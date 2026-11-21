@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hải Chiến Tọa Độ</title>
+<meta name="description" content="Game lớp học môn Toán: trả lời đúng để được bắn pháo vào các điểm trên mặt phẳng tọa độ Oxy, tìm và đánh chìm hạm đội.">
+<meta name="theme-color" content="#082f49">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+:root{--ink:#0f172a;--muted:#475569;--a:#ef4444;--b:#3b82f6;--c:#f59e0b;--d:#10b981;--e:#a855f7;--f:#ec4899;--ok:#16a34a;--bad:#dc2626;--sea1:#082f49;--sea2:#0c4a6e;--sea3:#0369a1}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--ink);background:radial-gradient(120% 90% at 50% 10%,#0e7490 0%,#0c4a6e 45%,#082f49 100%);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.35;
+  background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.18) 0 2px,transparent 3px) 0 0/90px 90px,
+             radial-gradient(circle at 70% 60%,rgba(255,255,255,.12) 0 1.5px,transparent 2.5px) 0 0/130px 130px;animation:sea 40s linear infinite}
+@keyframes sea{to{background-position:900px 300px,-1300px 520px}}
+button{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+
+/* Thanh trên */
+.topbar{position:fixed;left:0;right:0;top:0;height:56px;z-index:20;display:flex;align-items:center;gap:14px;padding:0 2vw;background:rgba(2,6,23,.72);color:#fff;box-shadow:0 4px 18px rgba(2,6,23,.35)}
+.brand{font-weight:900;letter-spacing:.06em;font-size:clamp(16px,1.5vw,26px);display:flex;align-items:center;gap:10px;white-space:nowrap}
+.brand .logo{display:grid;place-items:center;width:1.7em;height:1.7em;border-radius:10px;background:linear-gradient(135deg,#38bdf8,#0369a1);font-size:.9em}
+.progress{margin-left:auto;display:flex;gap:10px;font-weight:700;font-size:clamp(13px,1.15vw,21px)}
+.chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);padding:4px 12px;border-radius:999px;white-space:nowrap}
+.tools{display:flex;gap:8px}
+.tool{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:6px 12px;font-weight:700;font-size:clamp(13px,1vw,18px);text-decoration:none;white-space:nowrap}
+.tool:hover{background:rgba(255,255,255,.24)}
+
+/* Bản đồ */
+#boards{position:fixed;top:56px;left:0;right:0;bottom:0;display:flex;gap:2vw;justify-content:center;align-items:flex-start;padding:10px 2vw 92px}
+.board{display:flex;flex-direction:column;align-items:center;min-width:0;max-height:100%;transition:filter .3s,opacity .3s}
+.bhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;background:rgba(2,6,23,.55);color:#fff;border-radius:16px;padding:6px 14px;margin-bottom:8px;
+  border:3px solid transparent;font-weight:800;font-size:clamp(13px,1.15vw,21px);max-width:100%}
+.bhead .bn{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.bhead .dot{width:.9em;height:.9em;border-radius:50%;background:var(--tc);box-shadow:0 0 0 2px #fff}
+.bhead .fleet{display:flex;gap:5px;align-items:center}
+.bhead .sh{height:.75em;border-radius:999px;background:#94a3b8;border:2px solid #e2e8f0}
+.bhead .sh.sunk{background:#ef4444;border-color:#fecaca;opacity:.55;position:relative}
+.bhead .sh.sunk::after{content:"";position:absolute;left:-2px;right:-2px;top:45%;height:2px;background:#fff;transform:rotate(-12deg)}
+.bhead .bst{color:#bae6fd;font-weight:700;white-space:nowrap}
+.bhead .armor{display:flex;gap:3px}
+.bhead .armor i{display:inline-block;width:.9em;height:.9em;border-radius:3px;background:#22c55e;border:2px solid #bbf7d0}
+.bhead .armor i.off{background:#475569;border-color:#64748b}
+.board.target .bhead{border-color:#fde047;box-shadow:0 0 0 4px rgba(253,224,71,.25)}
+.board.dim{filter:saturate(.6) brightness(.8)}
+.board svg{display:block;height:calc(100vh - 56px - 92px - 70px);width:auto;max-width:94vw;border-radius:18px;
+  background:linear-gradient(180deg,rgba(14,165,233,.28),rgba(3,105,161,.35));box-shadow:inset 0 0 0 3px rgba(186,230,253,.35),0 16px 40px rgba(2,6,23,.45)}
+#boards.two .board svg{max-width:47vw}
+.board.target svg{box-shadow:inset 0 0 0 4px #fde047,0 0 0 6px rgba(253,224,71,.25),0 16px 40px rgba(2,6,23,.45)}
+.grid line{stroke:rgba(224,242,254,.28);stroke-width:1.5}
+.axis{stroke:#e0f2fe;stroke-width:3.5}
+.axis-head{fill:#e0f2fe}
+.tick{fill:#e0f2fe;font:700 17px "Segoe UI",Arial,sans-serif;text-anchor:middle;opacity:.9;pointer-events:none}
+.axname{fill:#fde047;font:italic 900 24px Georgia,"Times New Roman",serif;pointer-events:none}
+.pt .dot{fill:rgba(224,242,254,.7);transition:r .15s}
+.pt .hitzone{fill:transparent}
+.board.target .pt{cursor:crosshair}
+.board.target .pt:hover .dot{r:8;fill:#fde047}
+.mk-miss circle{fill:none;stroke:#e0f2fe;stroke-width:3.5}
+.mk-miss .c2{fill:#e0f2fe;stroke:none}
+.mk-hit .ring{fill:#ef4444;stroke:#7f1d1d;stroke-width:3}
+.mk-hit text{font-size:24px;text-anchor:middle;pointer-events:none}
+.ship{fill:#334155;stroke:#0f172a;stroke-width:3}
+.ship-deck{fill:#64748b}
+.ship.reveal{fill:rgba(253,224,71,.18);stroke:#fde047;stroke-dasharray:8 6}
+.radar rect{fill:rgba(34,197,94,.14);stroke:#4ade80;stroke-width:3;stroke-dasharray:10 6}
+.radar text{fill:#bbf7d0;font:900 30px "Segoe UI",Arial,sans-serif;text-anchor:middle;paint-order:stroke;stroke:#052e16;stroke-width:5}
+.cursorg{pointer-events:none}
+.cursorg .ring{fill:none;stroke:#fde047;stroke-width:4}
+.cursorg .cross{stroke:#fde047;stroke-width:2;stroke-dasharray:6 6;opacity:.7}
+.cursorg .lbl rect{fill:#0f172a;stroke:#fde047;stroke-width:2}
+.cursorg .lbl text{fill:#fde047;font:900 22px "Segoe UI",Arial,sans-serif;text-anchor:middle}
+
+/* Thẻ câu hỏi */
+#qback{position:fixed;inset:56px 0 0 0;z-index:30;background:rgba(2,6,23,.45);backdrop-filter:blur(2px)}
+#qcard{position:fixed;z-index:31;left:50%;top:calc(56px + 2vh);transform:translateX(-50%);width:min(1250px,95vw);max-height:calc(100vh - 56px - 4vh);overflow:auto;
+  background:#fff;border-radius:24px;padding:0 2.4vw 2vh;box-shadow:0 10px 0 rgba(2,6,23,.2),0 30px 80px rgba(2,6,23,.5);animation:cardIn .35s cubic-bezier(.2,1.3,.4,1)}
+@keyframes cardIn{from{transform:translate(-50%,30px) scale(.96);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.timer{position:sticky;top:0;margin:0 -2.4vw;height:10px;background:#e2e8f0;z-index:2}
+#timerFill{height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#a3e635);transform-origin:left}
+#timerFill.warn{background:linear-gradient(90deg,#ef4444,#f97316)}
+.qhead{display:flex;align-items:center;gap:12px;margin:1.4vh 0 1vh;flex-wrap:wrap}
+.qbadge{background:#0f172a;color:#fff;font-weight:900;border-radius:12px;padding:4px 14px;font-size:clamp(14px,1.25vw,22px);white-space:nowrap}
+.qtype{background:#f1f5f9;color:#334155;font-weight:800;border-radius:12px;padding:4px 12px;font-size:clamp(12px,1.05vw,19px);white-space:nowrap}
+.turn{color:#fff;background:var(--tc);font-weight:900;border-radius:12px;padding:4px 14px;font-size:clamp(14px,1.25vw,22px);white-space:nowrap}
+.timenum{margin-left:auto;font-weight:900;font-size:clamp(18px,1.8vw,34px);background:#f1f5f9;border-radius:14px;padding:2px 14px;min-width:3.2em;text-align:center;font-variant-numeric:tabular-nums}
+.timenum.warn{background:#fee2e2;color:#b91c1c;animation:beat .5s ease-in-out infinite alternate}
+@keyframes beat{to{transform:scale(1.12)}}
+.qtext{font-weight:700;font-size:clamp(20px,2.3vw,42px);line-height:1.35;white-space:pre-line;margin-bottom:1.4vh}
+.qtext.long{font-size:clamp(17px,1.85vw,34px)}
+.qtext .st-lbl{display:inline-block;background:#fef3c7;border:2px solid #f59e0b;border-radius:10px;padding:0 .35em;margin-right:.25em}
+img.qimg{max-width:100%;vertical-align:middle;border-radius:6px;background:#fff}
+.qtext img.qimg{max-height:24vh}
+img.qimg.fig{float:right;max-width:36%;margin:0 0 .4em 1.2vw;border:2px solid #e2e8f0}
+.ans img.qimg{max-height:14vh}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:1.2vh 1.4vw;clear:both}
+.ans{display:flex;align-items:center;gap:.7em;text-align:left;background:#f8fafc;border:3px solid #e2e8f0;border-radius:18px;padding:1vh 1vw;min-height:7vh;
+  font-size:clamp(18px,2vw,36px);font-weight:600;color:var(--ink);box-shadow:0 5px 0 #cbd5e1;transition:transform .08s,background .2s,border-color .2s,opacity .2s}
+.ans:hover{background:#fff;border-color:#94a3b8}
+.ans:active{transform:translateY(3px)}
+.ans .key{flex:none;display:grid;place-items:center;min-width:1.7em;height:1.7em;padding:0 .2em;border-radius:12px;color:#fff;font-weight:900;box-shadow:inset 0 -4px 0 rgba(0,0,0,.2)}
+.ans .txt{flex:1;min-width:0}
+.ans:nth-child(1) .key{background:var(--a)}.ans:nth-child(2) .key{background:var(--b)}.ans:nth-child(3) .key{background:var(--c)}
+.ans:nth-child(4) .key{background:var(--d)}.ans:nth-child(5) .key{background:var(--e)}.ans:nth-child(6) .key{background:var(--f)}
+.answers.tf .ans{justify-content:center;font-weight:900;font-size:clamp(22px,2.6vw,46px)}
+.answers.tf .ans .txt{flex:none}
+.answers.tf .ans:nth-child(1) .key{background:var(--ok)}.answers.tf .ans:nth-child(2) .key{background:var(--bad)}
+.answers.locked .ans,.answers.locked .jbtn{pointer-events:none}
+.ans.picked{border-color:#0f172a;background:#e0f2fe}
+.ans.correct{border-color:var(--ok);background:#dcfce7;box-shadow:0 5px 0 #16a34a}
+.ans.wrong{border-color:var(--bad);background:#fee2e2;box-shadow:0 5px 0 #b91c1c;animation:nope .45s}
+.ans.dim{opacity:.4}
+@keyframes nope{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.answers.short{display:block}
+.short-hint{color:var(--muted);font-weight:700;font-size:clamp(15px,1.4vw,24px);margin-bottom:1vh}
+.short-ans{display:inline-block;font-size:clamp(22px,2.6vw,46px);font-weight:900;background:#fef9c3;border:3px dashed #f59e0b;border-radius:16px;padding:.2em .8em;margin-bottom:1.2vh}
+.short-ans .lbl{font-size:.55em;color:#92400e;margin-right:.4em}
+.judge{display:flex;flex-wrap:wrap;gap:1.2vw}
+.jbtn{border:0;border-radius:16px;padding:.5em 1.1em;font-weight:900;font-size:clamp(17px,1.8vw,32px);color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.jbtn kbd,.big kbd{font:inherit;font-size:.6em;background:rgba(255,255,255,.28);border-radius:6px;padding:0 .4em;margin-left:.4em}
+.jbtn.show{background:linear-gradient(180deg,#60a5fa,#2563eb)}
+.jbtn.ok{background:linear-gradient(180deg,#4ade80,#16a34a)}
+.jbtn.bad{background:linear-gradient(180deg,#f87171,#dc2626)}
+.katex{font-size:1.05em}
+.katex-display{margin:.15em 0}
+/* Kết quả trong thẻ */
+#result{margin-top:1.6vh;border-radius:18px;padding:12px 16px;border:4px solid #e2e8f0;background:#f8fafc;clear:both;animation:pop .3s cubic-bezier(.2,1.5,.4,1)}
+#result.okb{border-color:#4ade80;background:#f0fdf4}
+#result.badb{border-color:#f87171;background:#fef2f2}
+#result.stealb{border-color:#f59e0b;background:#fffbeb}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}
+.rs-title{font-weight:900;font-size:clamp(18px,1.8vw,32px)}
+.rs-body{font-size:clamp(15px,1.4vw,25px);line-height:1.45;white-space:pre-line;margin-top:6px}
+.rs-body .lbl{font-weight:800;color:var(--muted)}
+.rs-foot{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px}
+.big{border:0;border-radius:16px;padding:.5em 1.15em;font-weight:900;font-size:clamp(16px,1.6vw,30px);color:#fff;background:linear-gradient(180deg,#60a5fa,#2563eb);box-shadow:0 6px 0 #1e40af}
+.big:active{transform:translateY(4px);box-shadow:0 2px 0 #1e40af}
+.big.go{background:linear-gradient(180deg,#fbbf24,#f59e0b);box-shadow:0 6px 0 #b45309;color:#1f2937}
+.big.fire{background:linear-gradient(180deg,#f87171,#dc2626);box-shadow:0 6px 0 #7f1d1d}
+.big.ghost{background:#fff;color:#1e293b;box-shadow:0 6px 0 #cbd5e1;border:2px solid #e2e8f0}
+.big.team{background:var(--tc);box-shadow:0 6px 0 rgba(0,0,0,.3)}
+
+/* Thanh ngắm bắn */
+#aimbar{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:25;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;justify-content:center;white-space:nowrap;
+  background:rgba(2,6,23,.85);color:#fff;border:3px solid var(--tc,#fde047);border-radius:20px;padding:8px 16px;box-shadow:0 12px 30px rgba(2,6,23,.5);max-width:96vw}
+#aimbar .who{font-weight:900;font-size:clamp(15px,1.45vw,26px);white-space:nowrap}
+#aimbar .shots{display:flex;gap:4px}
+#aimbar .shots i{display:inline-block;width:.9em;height:.9em;border-radius:50%;background:radial-gradient(circle at 35% 35%,#94a3b8,#0f172a);border:2px solid #e2e8f0}
+.coord{display:flex;align-items:center;gap:4px;font-weight:900;font-size:clamp(16px,1.5vw,28px)}
+.coord input{width:3.2em;font:inherit;text-align:center;border-radius:10px;border:2px solid #94a3b8;padding:2px 4px;background:#f8fafc;color:#0f172a}
+.abtn{border:0;border-radius:12px;padding:.35em .9em;font-weight:900;font-size:clamp(14px,1.3vw,24px);color:#fff;background:#dc2626;box-shadow:0 4px 0 #7f1d1d}
+.abtn.radar{background:#16a34a;box-shadow:0 4px 0 #14532d}
+.abtn.radar.on{outline:3px solid #fde047}
+.abtn.next{background:#2563eb;box-shadow:0 4px 0 #1e40af}
+.abtn:disabled{opacity:.4;cursor:not-allowed}
+#aimbar .msg{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:rgba(2,6,23,.85);color:#e0f2fe;font-weight:800;font-size:clamp(14px,1.25vw,22px);padding:6px 14px;border-radius:12px;white-space:nowrap}
+
+#banner{position:fixed;left:50%;top:46%;z-index:60;transform:translate(-50%,-50%);opacity:0;pointer-events:none;font-weight:900;font-size:clamp(34px,5.6vw,104px);
+  color:#fff;-webkit-text-stroke:4px #0f172a;text-shadow:0 8px 0 #0f172a;white-space:nowrap;text-align:center}
+#banner.small{font-size:clamp(26px,3.8vw,70px)}
+#banner.show{animation:bannerIn 1.3s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes bannerIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-6deg)}22%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(-3deg)}78%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-3deg)}100%{opacity:0;transform:translate(-50%,-62%) scale(1) rotate(-3deg)}}
+.ball{position:fixed;left:0;top:0;width:26px;height:26px;border-radius:50%;z-index:40;pointer-events:none;background:radial-gradient(circle at 35% 35%,#cbd5e1,#0f172a 70%);box-shadow:0 0 12px 4px rgba(251,146,60,.6)}
+#flash{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:0;background:#fff}
+#vignette{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(239,68,68,0) 45%,rgba(220,38,38,.75) 100%)}
+
+/* Lớp phủ */
+.overlay{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(2,6,23,.6);backdrop-filter:blur(4px)}
+.card{width:min(900px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;border-radius:28px;padding:clamp(18px,2.8vw,40px);text-align:center;box-shadow:0 30px 80px rgba(2,6,23,.5);animation:cardIn2 .4s cubic-bezier(.2,1.3,.4,1)}
+@keyframes cardIn2{from{transform:translateY(30px) scale(.95);opacity:0}to{transform:none;opacity:1}}
+.title{margin:0;font-weight:900;font-size:clamp(30px,4.2vw,72px);line-height:1.05;background:linear-gradient(180deg,#0ea5e9,#1e3a8a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{color:var(--muted);font-size:clamp(15px,1.45vw,23px);margin:.5em 0 .9em;font-weight:600}
+.segs{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:14px}
+.seg{display:inline-flex;background:#f1f5f9;border-radius:16px;padding:5px;gap:5px}
+.seg button{border:0;background:transparent;padding:7px 16px;border-radius:12px;font-weight:800;font-size:clamp(14px,1.25vw,20px);color:#334155}
+.seg button.on{background:#fff;color:#0f172a;box-shadow:0 3px 0 #cbd5e1,0 0 0 2px #0ea5e9}
+.rules{display:grid;gap:8px;text-align:left;margin:0 auto 16px;max-width:700px}
+.rule{display:flex;gap:12px;align-items:center;background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;padding:8px 14px;font-size:clamp(14px,1.25vw,21px);font-weight:600}
+.rule .ico{font-size:1.35em;flex:none}
+.stats{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:0 0 18px}
+.stat{background:#f1f5f9;border-radius:999px;padding:6px 16px;font-weight:800;font-size:clamp(14px,1.2vw,20px)}
+.actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.keys{margin-top:14px;color:var(--muted);font-size:clamp(12px,1vw,16px);line-height:1.8}
+.keys kbd{display:inline-block;background:#f1f5f9;border:1px solid #cbd5e1;border-bottom-width:3px;border-radius:6px;padding:0 6px;font-family:inherit;font-weight:700;color:#334155}
+.res-table{width:100%;max-width:700px;margin:0 auto 18px;border-collapse:separate;border-spacing:0 6px;font-weight:800;font-size:clamp(14px,1.35vw,23px)}
+.res-table td,.res-table th{padding:8px 12px;background:#f8fafc}
+.res-table th{background:transparent;color:var(--muted);font-size:.8em}
+.res-table tr td:first-child{border-radius:12px 0 0 12px;text-align:left;border-left:8px solid var(--tc)}
+.res-table tr td:last-child{border-radius:0 12px 12px 0}
+.medal{font-size:clamp(40px,5vw,80px)}
+@media (max-width:820px){.answers{grid-template-columns:1fr}.brand .txt{display:none}#boards{flex-direction:column;align-items:center}#boards.two .board svg{max-width:94vw;height:38vh}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="logo">⚓</span><span class="txt">HẢI CHIẾN TỌA ĐỘ</span></div>
+  <div class="progress"><span id="qCounter" class="chip">Lượt 0/0</span><span id="hitCounter" class="chip">💥 0 trúng</span></div>
+  <div class="tools">
+    <button id="btnEdit" class="tool" title="Soạn câu hỏi, nhập file Word, cài đặt (E)">✎ Câu hỏi</button>
+    <button id="btnMute" class="tool" title="Bật/tắt âm thanh (M)">🔊</button>
+    <button id="btnFull" class="tool" title="Toàn màn hình (F)">⛶</button>
+  </div>
+</header>
+
+<main id="boards"></main>
+
+<div id="qback" class="hidden"></div>
+<section id="qcard" class="hidden">
+  <div class="timer"><div id="timerFill"></div></div>
+  <div class="qhead">
+    <span id="qBadge" class="qbadge">Câu 1</span>
+    <span id="qType" class="qtype hidden"></span>
+    <span id="turnChip" class="turn hidden"></span>
+    <span id="timeNum" class="timenum">30</span>
+  </div>
+  <div id="qText" class="qtext"></div>
+  <div id="answers" class="answers"></div>
+  <div id="result" class="hidden">
+    <div id="rsTitle" class="rs-title"></div>
+    <div id="rsBody" class="rs-body"></div>
+    <div id="rsFoot" class="rs-foot"></div>
+  </div>
+</section>
+
+<div id="aimbar" class="hidden"></div>
+<div id="banner"></div>
+<div id="flash"></div>
+<div id="vignette"></div>
+
+<!-- Màn hình bắt đầu -->
+<div id="intro" class="overlay">
+  <div class="card">
+    <h1 class="title">HẢI CHIẾN TỌA ĐỘ</h1>
+    <p id="introSub" class="subtitle"></p>
+    <div class="segs">
+      <div id="modeSeg" class="seg" aria-label="Chế độ chơi"><button data-v="1">👥 Cả lớp</button><button data-v="2">⚔ 2 đội đối kháng</button></div>
+      <div id="sizeSeg" class="seg" aria-label="Kích thước bản đồ"><button data-v="7">−3 … 3</button><button data-v="9">−4 … 4</button><button data-v="11">−5 … 5</button></div>
+    </div>
+    <div id="rules" class="rules"></div>
+    <div id="introStats" class="stats"></div>
+    <div class="actions">
+      <button id="btnStart" class="big go">🚀 Ra khơi!</button>
+      <button id="btnEdit2" class="big ghost">✎ Soạn / nhập đề Word</button>
+    </div>
+    <div class="keys">Trả lời: <kbd>A</kbd>–<kbd>D</kbd> / <kbd>1</kbd>–<kbd>4</kbd> · Đúng/Sai: <kbd>1</kbd> <kbd>2</kbd> · Trả lời ngắn: <kbd>Enter</kbd> xem đáp án, <kbd>1</kbd> đúng, <kbd>2</kbd> sai<br>
+      Ngắm bắn: bấm vào điểm trên bản đồ, hoặc <kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> rồi <kbd>Enter</kbd> · <kbd>R</kbd> radar · <kbd>Space</kbd> tiếp tục · <kbd>F</kbd> toàn màn hình · <kbd>M</kbd> âm thanh</div>
+  </div>
+</div>
+
+<!-- Màn hình kết thúc -->
+<div id="endScreen" class="overlay hidden">
+  <div class="card">
+    <div id="endMedal" class="medal"></div>
+    <h1 id="endTitle" class="title"></h1>
+    <p id="endSub" class="subtitle"></p>
+    <table id="endTable" class="res-table"></table>
+    <div class="actions">
+      <button id="btnAgain" class="big go">↻ Chơi lại</button>
+      <button id="btnMap" class="big ghost">🗺 Xem bản đồ</button>
+      <button id="btnEdit3" class="big ghost">✎ Soạn câu hỏi</button>
+    </div>
+  </div>
+</div>
+
+<script src="lib/qbank.js"></script>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const { esc, rich, sleep, rand, pick, LETTERS } = QB;
+const A = QB.audio, FX = QB.fx;
+
+/* =================== Âm thanh =================== */
+const SFX = {
+  click() { A.tone(700, { dur: .06, type: "square", vol: .07 }); },
+  tick() { A.tone(1250, { dur: .05, type: "square", vol: .06 }); },
+  timeup() { A.tone(220, { dur: .5, type: "square", vol: .12 }); A.tone(165, { dur: .5, type: "square", vol: .1, delay: .05 }); },
+  turn() { A.seq([[659, 0, .1], [880, .1, .2]], { type: "triangle", vol: .18 }); },
+  start() { A.seq([[392, 0, .2], [523, .15, .2], [659, .3, .2], [784, .45, .55]], { type: "triangle", vol: .24 }); A.noise({ dur: 1.2, vol: .08, type: "lowpass", freq: 500, to: 200 }); },
+  question() { A.tone(880, { dur: .12, type: "triangle", vol: .15 }); A.tone(1320, { dur: .2, type: "triangle", vol: .12, delay: .08 }); },
+  reveal() { A.seq([[523, 0, .1], [784, .08, .25]], { type: "sine", vol: .2 }); },
+  correct() { A.seq([[523, 0, .14], [659, .07, .14], [784, .14, .14], [1046, .21, .3]], { type: "triangle", vol: .25 }); },
+  wrong() { A.tone(330, { dur: .18, type: "square", vol: .13 }); A.tone(233, { dur: .4, type: "square", vol: .13, delay: .16 }); },
+  cannon() { A.noise({ dur: .5, vol: .55, type: "lowpass", freq: 1400, to: 90 }); A.tone(95, { dur: .45, type: "sine", vol: .5, to: 38 }); },
+  whistle() { A.tone(1500, { dur: .55, type: "sine", vol: .06, to: 480 }); },
+  splash() { A.noise({ dur: .7, vol: .38, type: "bandpass", freq: 1100, to: 280, q: 1.5 }); [0, .08, .17, .25].forEach(d => A.tone(rand(900, 1700), { dur: .08, type: "sine", vol: .05, delay: .15 + d, to: rand(1800, 2600) })); },
+  boom() { A.noise({ dur: 1, vol: .7, type: "lowpass", freq: 3200, to: 70 }); A.tone(120, { dur: .8, type: "sine", vol: .55, to: 30 }); A.tone(900, { dur: .12, type: "square", vol: .06, to: 300 }); },
+  sink() { A.seq([[392, 0, .25], [330, .22, .25], [262, .44, .25], [196, .66, .6]], { type: "square", vol: .09 }); for (let i = 0; i < 7; i++) A.tone(rand(500, 1200), { dur: .07, type: "sine", vol: .05, delay: .5 + i * .09, to: rand(1400, 2200) }); },
+  radar() { A.tone(500, { dur: .5, type: "sine", vol: .12, to: 1800 }); A.tone(1800, { dur: .35, type: "sine", vol: .1, delay: .5 }); },
+  alarm() { A.seq([[740, 0, .22], [554, .22, .22], [740, .44, .22], [554, .66, .22]], { type: "sawtooth", vol: .07 }); },
+  victory() { A.seq([[523, 0, .12], [659, .12, .12], [784, .24, .12], [1046, .36, .3], [880, .72, .14], [988, .86, .14], [1046, 1.0, .14], [1318, 1.14, .9]], { type: "triangle", vol: .26 }); A.seq([[262, 0, .34], [330, .36, .34], [349, .72, .4], [392, 1.14, .9]], { type: "square", vol: .06 }); },
+  defeat() { A.seq([[392, 0, .32], [370, .32, .32], [349, .64, .32], [311, .96, 1.0]], { type: "sawtooth", vol: .11, vib: 5 }); },
+  escape() { A.seq([[523, 0, .15], [440, .16, .15], [392, .32, .5]], { type: "triangle", vol: .2 }); }
+};
+
+/* =================== Cài đặt =================== */
+const TEAM_DEF = [
+  { name: "Hạm đội Đỏ", c: "#ef4444" },
+  { name: "Hạm đội Xanh", c: "#2563eb" }
+];
+const DEF = { mode: 2, size: 9, time: 30, shots: 2, bonusHit: true, armor: 5, radar: 1, steal: true, showCoord: true, shuffleQ: false, shuffleA: false, teamNames: TEAM_DEF.map(t => t.name) };
+let S = QB.getSettings("haichien", DEF);
+const saveS = () => QB.saveSettings("haichien", S);
+const FLEETS = {
+  7: [[3, "Tuần dương hạm"], [3, "Tàu ngầm"], [2, "Khu trục hạm"], [2, "Tàu tuần tra"]],
+  9: [[4, "Thiết giáp hạm"], [3, "Tuần dương hạm"], [3, "Tàu ngầm"], [2, "Khu trục hạm"], [2, "Tàu tuần tra"]],
+  11: [[5, "Tàu sân bay"], [4, "Thiết giáp hạm"], [3, "Tuần dương hạm"], [3, "Tàu ngầm"], [2, "Khu trục hạm"], [2, "Tàu tuần tra"]]
+};
+const fmt = v => v < 0 ? "−" + (-v) : String(v);
+const P = (x, y) => `(${fmt(x)}; ${fmt(y)})`;
+
+/* =================== Trạng thái =================== */
+const G = { phase: "intro", rounds: [], idx: 0, teams: [], boards: [], cur: 0, actor: 0, shooter: 0, shotsLeft: 0, stealUsed: false, stealing: false,
+  firstChoice: null, cursor: { x: 0, y: 0 }, radarMode: false, timer: null, deadline: 0, lastSec: -1, shortShown: false, armor: 0, maxArmor: 0 };
+const teamMode = () => G.teams.length > 1;
+const curTeam = () => G.teams[G.actor];
+const targetOf = t => teamMode() ? G.boards[1 - t] : G.boards[0];
+
+/* ----- Xếp tàu ngẫu nhiên (không chạm nhau, kể cả chéo) ----- */
+function placeFleet(n, fleet) {
+  for (let attempt = 0; attempt < 500; attempt++) {
+    const taken = new Set(), ships = [];
+    let ok = true;
+    for (const [len, name] of fleet) {
+      let placed = false;
+      for (let t = 0; t < 300 && !placed; t++) {
+        const hor = Math.random() < .5;
+        const x0 = Math.floor(rand(-n, n + 1 - (hor ? len - 1 : 0))), y0 = Math.floor(rand(-n, n + 1 - (hor ? 0 : len - 1)));
+        const cells = Array.from({ length: len }, (_, i) => hor ? [x0 + i, y0] : [x0, y0 + i]);
+        if (cells.some(([x, y]) => x > n || y > n || x < -n || y < -n)) continue;
+        if (cells.some(([x, y]) => { for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if (taken.has((x + dx) + "," + (y + dy))) return true; return false; })) continue;
+        cells.forEach(([x, y]) => taken.add(x + "," + y));
+        ships.push({ len, name, cells, hits: 0, sunk: false });
+        placed = true;
+      }
+      if (!placed) { ok = false; break; }
+    }
+    if (ok) return ships;
+  }
+  throw new Error("Không xếp được tàu");
+}
+function newBoard(owner) {
+  const n = (S.size - 1) / 2;
+  return { owner, n, ships: placeFleet(n, FLEETS[S.size]), shots: {}, radar: [], reveal: false };
+}
+const shipAt = (b, x, y) => b.ships.find(s => s.cells.some(([cx, cy]) => cx === x && cy === y));
+const fleetLeft = b => b.ships.filter(s => !s.sunk).length;
+const allSunk = b => b.ships.every(s => s.sunk);
+
+function newGame() {
+  stopTimer();
+  FX.clear();
+  const qs = QB.parse(QB.getText()).questions;
+  G.rounds = QB.buildRounds(qs, { shuffleQ: S.shuffleQ, shuffleA: S.shuffleA });
+  const mode = +S.mode === 1 ? 1 : 2;
+  G.teams = mode === 1
+    ? [{ name: "Cả lớp", c: "#0ea5e9", shots: 0, hits: 0, sunk: 0, radar: +S.radar, correct: 0, answered: 0, steals: 0 }]
+    : TEAM_DEF.map((d, i) => ({ ...d, name: (S.teamNames[i] || d.name).trim() || d.name, shots: 0, hits: 0, sunk: 0, radar: +S.radar, correct: 0, answered: 0, steals: 0 }));
+  G.boards = mode === 1 ? [newBoard(-1)] : [newBoard(0), newBoard(1)];
+  Object.assign(G, { idx: 0, cur: 0, actor: 0, shooter: 0, shotsLeft: 0, stealUsed: false, stealing: false, cursor: { x: 0, y: 0 }, radarMode: false, armor: +S.armor, maxArmor: +S.armor });
+  hideCard(); $("#aimbar").classList.add("hidden");
+  renderBoards();
+  updateCounters();
+}
+
+/* =================== Vẽ bản đồ tọa độ =================== */
+const U = 56, M = 50;
+function geo(b) { const n = b.n, W = 2 * n * U + 2 * M; return { n, W, X: x => M + (x + n) * U, Y: y => M + (n - y) * U }; }
+function boardSVG(b, bi) {
+  const { n, W, X, Y } = geo(b);
+  let s = `<svg viewBox="0 0 ${W} ${W}" data-b="${bi}" role="img" aria-label="Mặt phẳng tọa độ Oxy">`;
+  s += `<g class="grid">`;
+  for (let i = -n; i <= n; i++) { s += `<line x1="${X(i)}" y1="${Y(n) - 18}" x2="${X(i)}" y2="${Y(-n) + 18}"/><line x1="${X(-n) - 18}" y1="${Y(i)}" x2="${X(n) + 18}" y2="${Y(i)}"/>`; }
+  s += `</g>`;
+  // trục
+  s += `<line class="axis" x1="${X(-n) - 30}" y1="${Y(0)}" x2="${X(n) + 26}" y2="${Y(0)}"/><polygon class="axis-head" points="${X(n) + 40},${Y(0)} ${X(n) + 22},${Y(0) - 9} ${X(n) + 22},${Y(0) + 9}"/>`;
+  s += `<line class="axis" x1="${X(0)}" y1="${Y(-n) + 30}" x2="${X(0)}" y2="${Y(n) - 26}"/><polygon class="axis-head" points="${X(0)},${Y(n) - 40} ${X(0) - 9},${Y(n) - 22} ${X(0) + 9},${Y(n) - 22}"/>`;
+  s += `<text class="axname" x="${X(n) + 30}" y="${Y(0) + 34}">x</text><text class="axname" x="${X(0) + 16}" y="${Y(n) - 26}">y</text><text class="axname" x="${X(0) - 20}" y="${Y(0) + 28}">O</text>`;
+  for (let i = -n; i <= n; i++) if (i) {
+    s += `<text class="tick" x="${X(i)}" y="${Y(0) + 25}">${fmt(i)}</text><text class="tick" x="${X(0) - 18}" y="${Y(i) + 6}">${fmt(i)}</text>`;
+  }
+  // tàu đã chìm / lộ diện cuối trận
+  for (const sh of b.ships) {
+    if (!sh.sunk && !b.reveal) continue;
+    const xs = sh.cells.map(c => c[0]), ys = sh.cells.map(c => c[1]);
+    const x1 = X(Math.min(...xs)), x2 = X(Math.max(...xs)), y1 = Y(Math.max(...ys)), y2 = Y(Math.min(...ys));
+    const pad = 21;
+    s += `<rect class="ship${sh.sunk ? "" : " reveal"}" x="${x1 - pad}" y="${y1 - pad}" width="${x2 - x1 + 2 * pad}" height="${y2 - y1 + 2 * pad}" rx="${pad}"/>`;
+    if (sh.sunk) for (const [cx, cy] of sh.cells) s += `<rect class="ship-deck" x="${X(cx) - 8}" y="${Y(cy) - 8}" width="16" height="16" rx="3"/>`;
+  }
+  // radar
+  for (const r of b.radar) {
+    s += `<g class="radar"><rect x="${X(r.x - 1) - U / 2}" y="${Y(r.y + 1) - U / 2}" width="${3 * U}" height="${3 * U}" rx="14"/><text x="${X(r.x)}" y="${Y(r.y) + 11}">📡${r.count}</text></g>`;
+  }
+  // các điểm nguyên
+  for (let x = -n; x <= n; x++) for (let y = -n; y <= n; y++) {
+    const k = x + "," + y, shot = b.shots[k];
+    s += `<g class="pt" data-x="${x}" data-y="${y}"><circle class="hitzone" cx="${X(x)}" cy="${Y(y)}" r="${U / 2}"/>`;
+    if (shot === "miss") s += `<g class="mk-miss"><circle cx="${X(x)}" cy="${Y(y)}" r="11"/><circle class="c2" cx="${X(x)}" cy="${Y(y)}" r="4"/></g>`;
+    else if (shot === "hit") s += `<g class="mk-hit"><circle class="ring" cx="${X(x)}" cy="${Y(y)}" r="16"/><text x="${X(x)}" y="${Y(y) + 8}">🔥</text></g>`;
+    else s += `<circle class="dot" cx="${X(x)}" cy="${Y(y)}" r="4.5"/>`;
+    s += `</g>`;
+  }
+  s += `<g id="cursor-${bi}" class="cursorg hidden"></g></svg>`;
+  return s;
+}
+function boardHead(b, bi) {
+  const fleet = b.ships.map(sh => `<span class="sh${sh.sunk ? " sunk" : ""}" style="width:${sh.len * .85}em" title="${sh.name} (${sh.len} ô)${sh.sunk ? " — đã chìm" : ""}"></span>`).join("");
+  if (!teamMode()) {
+    const t = G.teams[0];
+    return `<span class="bn">🏴‍☠️ Hạm đội bí ẩn</span><span class="fleet">${fleet}</span>
+      <span class="bst">🎯 ${t.shots} phát · 💥 ${t.hits} trúng</span>
+      <span class="bn">🛡 Giáp<span class="armor">${Array.from({ length: G.maxArmor }, (_, i) => `<i class="${i < G.armor ? "" : "off"}"></i>`).join("")}</span></span>`;
+  }
+  const owner = G.teams[b.owner], enemy = G.teams[1 - b.owner];
+  return `<span class="bn" style="--tc:${owner.c}"><span class="dot"></span>Vùng biển ${esc(owner.name)}</span><span class="fleet">${fleet}</span>
+    <span class="bst">${esc(enemy.name)}: 🎯 ${enemy.shots} · 💥 ${enemy.hits}</span>`;
+}
+function renderBoards() {
+  const box = $("#boards");
+  box.classList.toggle("two", teamMode());
+  box.innerHTML = G.boards.map((b, i) => `<div class="board" id="board-${i}"><div class="bhead" id="bhead-${i}">${boardHead(b, i)}</div>${boardSVG(b, i)}</div>`).join("");
+  markTarget();
+}
+function refreshBoard(i) {
+  const b = G.boards[i], el = $("#board-" + i);
+  if (!el) return renderBoards();
+  el.querySelector("svg").outerHTML = boardSVG(b, i);
+  $("#bhead-" + i).innerHTML = boardHead(b, i);
+  markTarget();
+}
+function markTarget() {
+  const aiming = G.phase === "aim";
+  G.boards.forEach((b, i) => {
+    const el = $("#board-" + i); if (!el) return;
+    const isT = aiming && targetOf(G.shooter) === b;
+    el.classList.toggle("target", isT);
+    el.classList.toggle("dim", aiming && !isT);
+  });
+  drawCursor();
+}
+function drawCursor() {
+  document.querySelectorAll(".cursorg").forEach(g => { g.classList.add("hidden"); g.innerHTML = ""; });
+  if (G.phase !== "aim") return;
+  const b = targetOf(G.shooter), bi = G.boards.indexOf(b), g = $("#cursor-" + bi);
+  if (!g) return;
+  const { X, Y, W } = geo(b), { x, y } = G.cursor, cx = X(x), cy = Y(y);
+  let s = `<line class="cross" x1="${cx}" y1="${M - 20}" x2="${cx}" y2="${W - M + 20}"/><line class="cross" x1="${M - 20}" y1="${cy}" x2="${W - M + 20}" y2="${cy}"/>`;
+  if (G.radarMode) s += `<rect x="${X(x - 1) - U / 2}" y="${Y(y + 1) - U / 2}" width="${3 * U}" height="${3 * U}" rx="14" fill="rgba(74,222,128,.15)" stroke="#4ade80" stroke-width="4"/>`;
+  s += `<circle class="ring" cx="${cx}" cy="${cy}" r="22"/>`;
+  if (S.showCoord) {
+    const label = P(x, y), w = 22 + label.length * 12.5, ly = cy - 52 < 8 ? cy + 32 : cy - 58, lx = Math.min(Math.max(cx, w / 2 + 6), W - w / 2 - 6);
+    s += `<g class="lbl"><rect x="${lx - w / 2}" y="${ly}" width="${w}" height="36" rx="10"/><text x="${lx}" y="${ly + 26}">${label}</text></g>`;
+  }
+  g.innerHTML = s; g.classList.remove("hidden");
+}
+
+/* =================== Màn hình bắt đầu =================== */
+function showIntro() {
+  G.phase = "intro";
+  const mode = +S.mode, n = (S.size - 1) / 2, fleet = FLEETS[S.size];
+  document.querySelectorAll("#modeSeg button").forEach(b => b.classList.toggle("on", +b.dataset.v === mode));
+  document.querySelectorAll("#sizeSeg button").forEach(b => b.classList.toggle("on", +b.dataset.v === +S.size));
+  $("#introSub").textContent = mode === 1
+    ? "Cả lớp chỉ huy chiến hạm, trả lời đúng để nã pháo vào các điểm trên mặt phẳng Oxy và tìm ra hạm đội bí ẩn!"
+    : "Hai hạm đội đối đầu: trả lời đúng để nã pháo vào vùng biển của đối thủ. Ai đánh chìm hết tàu địch trước sẽ thắng!";
+  const rules = [
+    ["✅", `Trả lời đúng → được <b>${S.shots} phát pháo</b>. Đọc tọa độ điểm muốn bắn, ví dụ <b>(2; −3)</b>.`],
+    ["💥", "Tàu nằm trên các điểm có tọa độ nguyên, theo hàng ngang hoặc hàng dọc, không chạm nhau." + (S.bonusHit ? " Bắn <b>trúng</b> được thêm 1 phát!" : "")],
+    mode === 1 ? ["🛡", `Trả lời sai / hết giờ → hạm đội địch phản công, tàu mẹ mất 1 giáp (có ${S.armor} giáp).`]
+      : ["❌", "Trả lời sai / hết giờ → mất lượt bắn." + (S.steal ? " Đội kia được <b>cướp lượt</b>; cướp sai thì đối thủ được bắn 1 phát." : "")],
+    ...(+S.radar > 0 ? [["📡", `Mỗi ${mode === 1 ? "lớp" : "đội"} có ${S.radar} lần dùng <b>radar</b>: soi vùng 3×3 xem có bao nhiêu ô tàu (không mất phát bắn).`]] : []),
+    ["🏆", mode === 1 ? "Đánh chìm toàn bộ hạm đội để chiến thắng!" : "Đánh chìm hết tàu đối thủ trước, hoặc bắn trúng nhiều hơn khi hết câu hỏi."]
+  ];
+  $("#rules").innerHTML = rules.map(([i, t]) => `<div class="rule"><span class="ico">${i}</span><span>${t}</span></div>`).join("");
+  const qs = QB.parse(QB.getText()).questions;
+  $("#introStats").innerHTML = `<span class="stat">📝 ${qs.length} câu · ${G.rounds.length} lượt</span><span class="stat">🗺 Lưới ${S.size}×${S.size} (x, y từ ${fmt(-n)} đến ${n})</span>`
+    + `<span class="stat">🚢 ${fleet.length} tàu · ${fleet.reduce((s, f) => s + f[0], 0)} ô</span><span class="stat">⏱ ${S.time > 0 ? S.time + " giây/câu" : "Không giới hạn giờ"}</span>`;
+  $("#endScreen").classList.add("hidden");
+  $("#intro").classList.remove("hidden");
+}
+function setOpt(k, v) { S[k] = v; saveS(); newGame(); showIntro(); A.init(); SFX.click(); }
+
+function startGame() {
+  if (G.phase !== "intro" && G.phase !== "end" && G.phase !== "map") return;
+  A.init();
+  newGame();
+  if (!G.rounds.length) { openEditor(); return; }
+  SFX.start();
+  $("#intro").classList.add("hidden"); $("#endScreen").classList.add("hidden");
+  G.phase = "starting";
+  banner("RA KHƠI!", "#38bdf8");
+  setTimeout(showQuestion, 900);
+}
+function updateCounters() {
+  const started = !["intro", "starting"].includes(G.phase);
+  $("#qCounter").textContent = `Lượt ${Math.min(G.idx + (started ? 1 : 0), G.rounds.length)}/${G.rounds.length}`;
+  $("#hitCounter").textContent = teamMode() ? G.teams.map(t => `${t.name.replace(/^Hạm đội /, "")} 💥${t.hits}`).join(" · ") : `💥 ${G.teams[0] ? G.teams[0].hits : 0} trúng`;
+}
+
+/* =================== Câu hỏi =================== */
+function hideCard() { $("#qcard").classList.add("hidden"); $("#qback").classList.add("hidden"); }
+function showCard() { $("#qcard").classList.remove("hidden"); $("#qback").classList.remove("hidden"); $("#qcard").scrollTop = 0; }
+function showQuestion() {
+  const r = G.rounds[G.idx];
+  G.phase = "question"; G.shortShown = false;
+  G.actor = G.cur; G.stealUsed = false; G.stealing = false; G.firstChoice = null; G.radarMode = false;
+  updateCounters(); markTarget();
+  $("#aimbar").classList.add("hidden");
+  $("#result").classList.add("hidden");
+  $("#qBadge").textContent = r.label;
+  const qt = $("#qType"); qt.textContent = r.kind === "tf" ? "Đúng / Sai" : r.kind === "short" ? "Trả lời ngắn" : "Trắc nghiệm"; qt.classList.toggle("hidden", r.kind === "mc");
+  setTurnChip(teamMode() ? "Lượt: " + curTeam().name : "", curTeam().c);
+  $("#qText").innerHTML = r.kind === "tf" ? rich(r.q) + `\n<span class="st-lbl">${r.letter})</span> ` + rich(r.stmt) : rich(r.q);
+  const plain = (r.q + (r.stmt || "")).replace(/\[\[img:\w+\]\]/g, "").replace(/\\[a-zA-Z]+|[{}^_$]/g, "");
+  $("#qText").classList.toggle("long", plain.length > 170 || /\[\[img:/.test(r.q));
+  const box = $("#answers");
+  if (r.kind === "short") {
+    box.className = "answers short";
+    box.innerHTML = `<div class="short-hint">✍ ${teamMode() ? esc(curTeam().name) + " ghi" : "Cả lớp ghi"} đáp án ra bảng con / giấy, giáo viên kiểm tra rồi chấm.</div>
+      <div id="shortAns" class="short-ans hidden"><span class="lbl">ĐÁP ÁN</span>${rich(r.answer)}</div>
+      <div class="judge"><button class="jbtn show" data-act="show">👁 Xem đáp án<kbd>Enter</kbd></button>
+        <button class="jbtn ok" data-act="ok">✔ Trả lời ĐÚNG<kbd>1</kbd></button><button class="jbtn bad" data-act="bad">✘ Trả lời SAI<kbd>2</kbd></button></div>`;
+  } else {
+    box.className = "answers" + (r.kind === "tf" ? " tf" : "");
+    box.innerHTML = r.opts.map((o, i) => r.kind === "tf"
+      ? `<button class="ans" data-i="${i}"><span class="key">${i ? "S" : "Đ"}</span><span class="txt">${o}</span></button>`
+      : `<button class="ans" data-i="${i}"><span class="key">${LETTERS[i]}</span><span class="txt">${rich(o)}</span></button>`).join("");
+  }
+  QB.renderMath($("#qText")); QB.renderMath(box);
+  showCard();
+  if (teamMode()) { banner(curTeam().name, curTeam().c, true); SFX.turn(); } else SFX.question();
+  startTimer();
+}
+function setTurnChip(text, color) { const tc = $("#turnChip"); tc.textContent = text; tc.style.setProperty("--tc", color); tc.classList.toggle("hidden", !text); }
+
+function startTimer(override) {
+  stopTimer();
+  const T = override !== undefined ? override : +S.time;
+  const fill = $("#timerFill"), num = $("#timeNum");
+  fill.classList.remove("warn"); num.classList.remove("warn");
+  if (!(T > 0)) { num.textContent = "∞"; fill.style.transform = "scaleX(1)"; return; }
+  G.deadline = performance.now() + T * 1000; G.lastSec = -1;
+  const step = () => {
+    const left = Math.max(0, G.deadline - performance.now()), sec = Math.ceil(left / 1000);
+    fill.style.transform = `scaleX(${left / (T * 1000)})`;
+    if (sec !== G.lastSec) { G.lastSec = sec; num.textContent = sec; const w = sec <= 5; fill.classList.toggle("warn", w); num.classList.toggle("warn", w); if (w && sec > 0) SFX.tick(); }
+    if (left <= 0) { stopTimer(); onTimeUp(); }
+  };
+  step(); G.timer = setInterval(step, 100);
+}
+function stopTimer() { if (G.timer) clearInterval(G.timer); G.timer = null; $("#timeNum").classList.remove("warn"); }
+function onTimeUp() {
+  const r = G.rounds[G.idx];
+  if (r.kind === "short") { SFX.timeup(); banner("HẾT GIỜ!", "#ef4444"); showShortAnswer(); return; }
+  resolve(null);
+}
+function choose(i) {
+  if (G.phase !== "question") return;
+  const b = $("#answers").querySelectorAll(".ans")[i];
+  if (!b || b.classList.contains("wrong")) return;
+  if (document.activeElement) document.activeElement.blur();
+  resolve(i);
+}
+function showShortAnswer() {
+  if (G.phase !== "question" || G.shortShown) return;
+  G.shortShown = true; stopTimer(); SFX.reveal();
+  const a = $("#shortAns"); if (a) a.classList.remove("hidden");
+  const b = document.querySelector('.jbtn[data-act="show"]'); if (b) b.classList.add("hidden");
+}
+function judgeShort(ok) {
+  if (G.phase !== "question") return;
+  if (document.activeElement) document.activeElement.blur();
+  if (ok) showShortAnswer(); else stopTimer();
+  settle(ok, ok ? 0 : "x");
+}
+async function resolve(choice) {
+  if (G.phase !== "question") return;
+  const r = G.rounds[G.idx];
+  G.phase = "resolving"; stopTimer();
+  const box = $("#answers"); box.classList.add("locked");
+  const btns = [...box.querySelectorAll(".ans")];
+  if (choice !== null && btns[choice]) btns[choice].classList.add("picked");
+  await sleep(350);
+  if (choice !== null && btns[choice]) { btns[choice].classList.remove("picked"); btns[choice].classList.add(choice === r.ans ? "correct" : "wrong"); }
+  settle(choice === r.ans, choice);
+}
+function revealAnswerButtons() {
+  const r = G.rounds[G.idx];
+  if (r.kind === "short") { const a = $("#shortAns"); if (a) a.classList.remove("hidden"); const b = document.querySelector('.jbtn[data-act="show"]'); if (b) b.classList.add("hidden"); return; }
+  [...$("#answers").querySelectorAll(".ans")].forEach((b, i) => { if (i === r.ans) { b.classList.remove("wrong"); b.classList.add("correct"); } else if (!b.classList.contains("wrong")) b.classList.add("dim"); });
+}
+function canSteal() {
+  const r = G.rounds[G.idx];
+  if (!teamMode() || !S.steal || G.stealUsed || r.kind === "tf") return false;
+  if (r.kind === "short" && G.shortShown) return false;
+  if (r.kind === "mc" && r.opts.length - $("#answers").querySelectorAll(".ans.wrong").length < 2) return false;
+  return true;
+}
+function answerBody(ok) {
+  const r = G.rounds[G.idx];
+  let body = "";
+  if (!ok) {
+    if (r.kind === "mc") body += `<span class="lbl">Đáp án đúng:</span> ${LETTERS[r.ans]}. ${rich(r.opts[r.ans])}`;
+    else if (r.kind === "tf") body += `<span class="lbl">Đáp án đúng:</span> Ý ${r.letter}) là <b>${r.ans === 0 ? "ĐÚNG" : "SAI"}</b>`;
+    else body += `<span class="lbl">Đáp án đúng:</span> ${rich(r.answer)}`;
+  }
+  if (r.exp) body += (body ? "\n" : "") + `<span class="lbl">Lời giải:</span> ${rich(r.exp)}`;
+  return body;
+}
+function showResult(cls, title, body, buttons) {
+  const rs = $("#result");
+  rs.className = cls;
+  $("#rsTitle").textContent = title;
+  $("#rsBody").innerHTML = body || ""; $("#rsBody").style.display = body ? "" : "none";
+  $("#rsFoot").innerHTML = buttons;
+  QB.renderMath($("#rsBody"));
+  rs.classList.remove("hidden");
+  setTimeout(() => rs.scrollIntoView({ block: "nearest", behavior: "smooth" }), 60);
+  const first = $("#rsFoot button"); if (first) first.focus({ preventScroll: true });
+}
+async function settle(ok, choice) {
+  G.phase = "resolving"; stopTimer();
+  $("#answers").classList.add("locked");
+  const t = curTeam(); t.answered++;
+  if (ok) {
+    t.correct++;
+    SFX.correct(); banner("CHÍNH XÁC!", "#22c55e");
+    revealAnswerButtons();
+    G.shooter = G.actor; G.shotsLeft = +S.shots;
+    if (G.stealing) t.steals++;
+    G.phase = "result";
+    showResult("okb", (G.stealing ? `⚡ ${t.name} cướp lượt thành công! ` : "✅ Chính xác! ") + `${teamMode() ? t.name : "Cả lớp"} được bắn ${S.shots} phát.`,
+      answerBody(true), `<button class="big fire" data-act="aim">🎯 Vào vị trí bắn<kbd>Space</kbd></button>`);
+    return;
+  }
+  SFX.wrong(); banner(choice === null ? "HẾT GIỜ!" : "SAI RỒI!", "#ef4444");
+  if (!teamMode()) {
+    await sleep(500); await enemyStrike();
+    revealAnswerButtons();
+    G.phase = "result";
+    const over = G.armor <= 0;
+    showResult("badb", (choice === null ? "⏰ Hết giờ! " : "❌ Chưa đúng! ") + (over ? "Tàu mẹ đã hết giáp…" : "Hạm đội địch phản công, tàu mẹ mất 1 giáp."),
+      answerBody(false), `<button class="big" data-act="next">${over || G.idx + 1 >= G.rounds.length ? "Xem kết quả 🏁" : "Câu tiếp theo ▶"}<kbd>Space</kbd></button>`);
+    return;
+  }
+  if (G.stealing) {
+    // cướp sai -> đội bị cướp lượt được bắn 1 phát
+    revealAnswerButtons();
+    G.shooter = 1 - G.actor; G.shotsLeft = 1;
+    G.phase = "result";
+    showResult("badb", `❌ ${t.name} cướp lượt nhưng chưa đúng — ${G.teams[G.shooter].name} được bắn 1 phát!`, answerBody(false),
+      `<button class="big team" style="--tc:${G.teams[G.shooter].c}" data-act="aim">🎯 ${esc(G.teams[G.shooter].name)} vào vị trí bắn<kbd>Space</kbd></button>`);
+    return;
+  }
+  if (canSteal()) {
+    G.stealUsed = true; G.firstChoice = choice;
+    const other = G.teams[1 - G.actor];
+    G.phase = "steal";
+    showResult("stealb", `⚡ CƯỚP LƯỢT? ${t.name} trả lời chưa đúng.`,
+      `${esc(other.name)} có muốn giành quyền trả lời câu này không?\n<span class="lbl">Cướp đúng:</span> được bắn ${S.shots} phát · <span class="lbl">Cướp sai:</span> ${esc(t.name)} được bắn 1 phát.`,
+      `<button class="big team" style="--tc:${other.c}" data-act="steal">⚡ ${esc(other.name)} cướp lượt<kbd>1</kbd></button><button class="big ghost" data-act="nosteal">Không cướp<kbd>0</kbd></button>`);
+    SFX.turn();
+    return;
+  }
+  revealAnswerButtons();
+  G.phase = "result";
+  showResult("badb", (choice === null ? "⏰ Hết giờ! " : "❌ Chưa đúng! ") + `${t.name} mất lượt bắn.`, answerBody(false),
+    `<button class="big" data-act="next">${G.idx + 1 >= G.rounds.length ? "Xem kết quả 🏁" : "Câu tiếp theo ▶"}<kbd>Space</kbd></button>`);
+}
+function doSteal(yes) {
+  if (G.phase !== "steal") return;
+  SFX.click();
+  if (!yes) {
+    revealAnswerButtons(); G.phase = "result";
+    showResult("badb", `❌ ${curTeam().name} mất lượt bắn.`, answerBody(false), `<button class="big" data-act="next">${G.idx + 1 >= G.rounds.length ? "Xem kết quả 🏁" : "Câu tiếp theo ▶"}<kbd>Space</kbd></button>`);
+    return;
+  }
+  G.actor = 1 - G.actor; G.stealing = true;
+  const t = curTeam();
+  $("#result").classList.add("hidden");
+  setTurnChip("⚡ Cướp lượt: " + t.name, t.c);
+  const h = document.querySelector(".short-hint"); if (h) h.textContent = `⚡ ${t.name} cướp lượt — ghi đáp án ra bảng con, giáo viên chấm.`;
+  $("#answers").classList.remove("locked");
+  banner(t.name + " cướp lượt!", t.c, true); SFX.turn();
+  G.phase = "question";
+  startTimer(+S.time > 0 ? Math.max(5, Math.ceil(S.time / 2)) : 0);
+}
+
+/* ----- Hạm đội địch phản công (chế độ cả lớp) ----- */
+async function enemyStrike() {
+  SFX.alarm();
+  hideCard();
+  const b = $("#board-0 svg").getBoundingClientRect();
+  for (let i = 0; i < 3; i++) {
+    const from = { x: rand(b.left, b.right), y: b.top + 20 }, to = { x: innerWidth / 2 + rand(-200, 200), y: innerHeight + 10 };
+    flyBall(from, to, { duration: 650, arc: -120 });
+    await sleep(160);
+  }
+  await sleep(600);
+  SFX.boom(); flash("red"); shake(16, 450);
+  FX.burst(innerWidth / 2, innerHeight - 40, { n: 70, colors: ["#fde047", "#f97316", "#ef4444", "#ffffff"], speed: 600, shape: "mix" });
+  G.armor = Math.max(0, G.armor - 1);
+  refreshBoard(0);
+  await sleep(700);
+  showCard();
+}
+
+/* =================== Ngắm & bắn =================== */
+function enterAim() {
+  if (G.phase !== "result") return;
+  hideCard();
+  G.phase = "aim"; G.radarMode = false;
+  const b = targetOf(G.shooter);
+  // con trỏ bắt đầu ở điểm chưa bắn gần gốc O nhất
+  if (b.shots[G.cursor.x + "," + G.cursor.y]) {
+    let best = null;
+    for (let x = -b.n; x <= b.n; x++) for (let y = -b.n; y <= b.n; y++) if (!b.shots[x + "," + y]) { const d = x * x + y * y; if (!best || d < best.d) best = { x, y, d }; }
+    if (best) G.cursor = { x: best.x, y: best.y };
+  }
+  markTarget(); renderAimbar();
+  const t = G.teams[G.shooter];
+  banner("🎯 " + (teamMode() ? t.name : "Ngắm bắn!"), teamMode() ? t.c : "#fde047", true);
+}
+function renderAimbar(msg) {
+  const t = G.teams[G.shooter], bar = $("#aimbar");
+  bar.style.setProperty("--tc", teamMode() ? t.c : "#fde047");
+  const done = G.phase === "aimdone";
+  bar.innerHTML = done
+    ? `<span class="who">${msg || "Hết lượt bắn"}</span><button class="abtn next" data-act="next">${isOver() ? "Xem kết quả 🏁" : "Câu tiếp theo ▶"} <small>Space</small></button>`
+    : `<span class="who">🎯 ${esc(teamMode() ? t.name : "Cả lớp")} còn</span><span class="shots">${"<i></i>".repeat(G.shotsLeft)}</span>
+      <span class="coord">Bắn vào ( <input id="inX" type="number" step="1" value="${G.cursor.x}"> ; <input id="inY" type="number" step="1" value="${G.cursor.y}"> )</span>
+      <button class="abtn" data-act="fire">💥 Bắn!</button>
+      ${t.radar > 0 ? `<button class="abtn radar${G.radarMode ? " on" : ""}" data-act="radar" title="Phím R">📡 Radar (còn ${t.radar})</button>` : ""}
+      ${msg ? `<span class="msg">${msg}</span>` : `<span class="msg">Bấm vào điểm trên ${teamMode() ? "vùng biển " + esc(G.teams[1 - G.shooter].name) : "bản đồ"} hoặc gõ tọa độ</span>`}`;
+  bar.classList.remove("hidden");
+}
+function moveCursor(dx, dy) {
+  if (G.phase !== "aim") return;
+  const n = targetOf(G.shooter).n;
+  G.cursor = { x: Math.max(-n, Math.min(n, G.cursor.x + dx)), y: Math.max(-n, Math.min(n, G.cursor.y + dy)) };
+  drawCursor(); syncInputs();
+}
+function syncInputs() { const ix = $("#inX"), iy = $("#inY"); if (ix && document.activeElement !== ix) ix.value = G.cursor.x; if (iy && document.activeElement !== iy) iy.value = G.cursor.y; }
+function fireAtInputs() {
+  const x = Math.round(+$("#inX").value), y = Math.round(+$("#inY").value), n = targetOf(G.shooter).n;
+  if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > n || Math.abs(y) > n) { renderAimbar(`⚠ Tọa độ phải là số nguyên từ ${fmt(-n)} đến ${n}.`); return; }
+  G.cursor = { x, y }; drawCursor(); act(x, y);
+}
+function act(x, y) { if (G.radarMode) useRadar(x, y); else fire(x, y); }
+
+function useRadar(x, y) {
+  if (G.phase !== "aim") return;
+  const t = G.teams[G.shooter], b = targetOf(G.shooter);
+  if (t.radar <= 0) return;
+  t.radar--; G.radarMode = false;
+  let count = 0;
+  for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) { const px = x + dx, py = y + dy; if (Math.abs(px) <= b.n && Math.abs(py) <= b.n && shipAt(b, px, py) && b.shots[px + "," + py] !== "hit") count++; }
+  b.radar.push({ x, y, count });
+  SFX.radar();
+  refreshBoard(G.boards.indexOf(b));
+  banner(`📡 ${count} ô tàu quanh ${P(x, y)}`, "#4ade80", true);
+  renderAimbar(`Radar quanh ${P(x, y)}: ${count ? count + " ô tàu chưa bị bắn" : "không có tàu"}.`);
+}
+
+async function fire(x, y) {
+  if (G.phase !== "aim") return;
+  const b = targetOf(G.shooter), bi = G.boards.indexOf(b), k = x + "," + y;
+  if (b.shots[k]) { renderAimbar(`⚠ Điểm ${P(x, y)} đã bắn rồi, chọn điểm khác.`); SFX.wrong(); return; }
+  G.phase = "firing";
+  const t = G.teams[G.shooter];
+  t.shots++; G.shotsLeft--;
+  renderAimbar(`Khai hỏa vào ${P(x, y)}…`);
+  $("#aimbar").querySelectorAll("button,input").forEach(e => e.disabled = true);
+  // đạn bay
+  const pt = document.querySelector(`#board-${bi} .pt[data-x="${x}"][data-y="${y}"] .hitzone`);
+  const pr = pt.getBoundingClientRect(), to = { x: pr.left + pr.width / 2, y: pr.top + pr.height / 2 };
+  let from;
+  if (teamMode()) { const own = $(`#board-${1 - bi} svg`).getBoundingClientRect(); from = { x: own.left + own.width / 2, y: own.bottom - 10 }; }
+  else from = { x: innerWidth / 2, y: innerHeight + 20 };
+  SFX.cannon();
+  setTimeout(SFX.whistle, 120);
+  banner(P(x, y), "#fde047", true);
+  await flyBall(from, to, { duration: 750, arc: -Math.max(160, Math.abs(to.x - from.x) * .35) });
+  const sh = shipAt(b, x, y);
+  let msg;
+  if (sh) {
+    b.shots[k] = "hit"; sh.hits++; t.hits++;
+    SFX.boom(); flash("white", .6); shake(10, 350);
+    FX.burst(to.x, to.y, { n: 70, colors: ["#fde047", "#f97316", "#ef4444", "#ffffff", "#7c2d12"], speed: 520, shape: "mix" });
+    if (sh.hits >= sh.len) {
+      sh.sunk = true; t.sunk++;
+      refreshBoard(bi);
+      await sleep(350);
+      SFX.sink();
+      banner(`ĐÁNH CHÌM ${sh.name.toUpperCase()}!`, "#f97316", true);
+      sh.cells.forEach(([cx, cy]) => { const e = document.querySelector(`#board-${bi} .pt[data-x="${cx}"][data-y="${cy}"] .hitzone`); if (e) { const r = e.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, { n: 25, colors: ["#bae6fd", "#ffffff", "#0ea5e9"], speed: 260, up: .6 }); } });
+      msg = `💥 Trúng ${P(x, y)} — đã đánh chìm ${sh.name} (${sh.len} ô)!`;
+      await sleep(900);
+    } else {
+      refreshBoard(bi);
+      banner("TRÚNG RỒI!", "#ef4444");
+      msg = `💥 Trúng tàu địch tại ${P(x, y)}!`;
+      await sleep(700);
+    }
+    if (S.bonusHit && !allSunk(b)) { G.shotsLeft++; msg += " Được thưởng thêm 1 phát!"; }
+  } else {
+    b.shots[k] = "miss";
+    SFX.splash();
+    FX.burst(to.x, to.y, { n: 45, colors: ["#e0f2fe", "#7dd3fc", "#ffffff", "#0ea5e9"], speed: 380, up: .9, grav: 900 });
+    for (let i = 0; i < 3; i++) FX.add({ x: to.x, y: to.y, life: .6 + i * .15, fade: .6, size: 22 + i * 10, color: "#e0f2fe", shape: "ring" });
+    refreshBoard(bi);
+    msg = `🌊 Trượt! ${P(x, y)} chỉ có nước.`;
+    await sleep(600);
+  }
+  updateCounters();
+  if (allSunk(b)) { await sleep(400); return endGame(teamMode() ? "teamwin" : "win"); }
+  if (G.shotsLeft > 0) { G.phase = "aim"; markTarget(); renderAimbar(msg); return; }
+  G.phase = "aimdone"; markTarget(); renderAimbar(msg);
+  $("#aimbar .abtn.next").focus({ preventScroll: true });
+}
+
+function isOver() { return G.idx + 1 >= G.rounds.length || (!teamMode() && G.armor <= 0); }
+function next() {
+  if (G.phase !== "result" && G.phase !== "aimdone") return;
+  if (document.activeElement) document.activeElement.blur();
+  SFX.click();
+  if (!teamMode() && G.armor <= 0) return endGame("lose");
+  if (G.idx + 1 >= G.rounds.length) return endGame("out");
+  G.idx++;
+  if (teamMode()) G.cur = 1 - G.cur;
+  showQuestion();
+}
+
+/* =================== Kết thúc =================== */
+function endGame(type) {
+  G.phase = "end"; stopTimer(); hideCard(); $("#aimbar").classList.add("hidden");
+  G.boards.forEach(b => b.reveal = true); renderBoards();
+  const row = t => `<td>${esc(t.name)}</td><td>🎯 ${t.shots}</td><td>💥 ${t.hits}</td><td>${t.shots ? Math.round(t.hits / t.shots * 100) : 0}%</td><td>🚢 ${t.sunk}</td><td>✔ ${t.correct}/${t.answered}</td>`;
+  const head = `<tr><th></th><th>Phát bắn</th><th>Trúng</th><th>Chính xác</th><th>Đánh chìm</th><th>Trả lời đúng</th></tr>`;
+  let medal, title, sub, win = false;
+  if (!teamMode()) {
+    const b = G.boards[0], sunk = b.ships.filter(s => s.sunk).length, total = b.ships.length;
+    if (type === "win") { medal = "🏆"; title = "TOÀN THẮNG!"; sub = "Cả lớp đã đánh chìm toàn bộ hạm đội bí ẩn!"; win = true; }
+    else if (type === "lose") { medal = "⚓"; title = "TÀU MẸ BỊ HẠ…"; sub = `Đã đánh chìm ${sunk}/${total} tàu địch. Ôn lại bài và phục thù nhé!`; }
+    else { const st = sunk / total; medal = st >= .6 ? "⭐⭐" : st > 0 ? "⭐" : "🌊"; title = "HẾT ĐẠN DƯỢC!"; sub = `Hết câu hỏi — cả lớp đã đánh chìm ${sunk}/${total} tàu địch.`; }
+    $("#endTable").innerHTML = head + `<tr style="--tc:#0ea5e9">${row(G.teams[0])}</tr>`;
+  } else {
+    const [a, b] = G.teams;
+    let winner = null;
+    if (type === "teamwin") winner = G.shooter;
+    else if (a.hits !== b.hits) winner = a.hits > b.hits ? 0 : 1;
+    else if (a.sunk !== b.sunk) winner = a.sunk > b.sunk ? 0 : 1;
+    if (winner === null) { medal = "🤝"; title = "HÒA!"; sub = "Hai hạm đội ngang tài ngang sức."; }
+    else { const w = G.teams[winner]; medal = "🏆"; title = `${w.name.toUpperCase()} THẮNG!`; sub = type === "teamwin" ? `${w.name} đã đánh chìm toàn bộ tàu đối thủ!` : `Hết câu hỏi — ${w.name} bắn trúng nhiều hơn.`; win = true; }
+    const order = winner === 1 ? [b, a] : [a, b];
+    $("#endTable").innerHTML = head + order.map(t => `<tr style="--tc:${t.c}">${row(t)}</tr>`).join("");
+  }
+  $("#endMedal").textContent = medal; $("#endTitle").textContent = title; $("#endSub").textContent = sub;
+  $("#endScreen").classList.remove("hidden");
+  if (win) { SFX.victory(); FX.confetti(4); } else if (type === "lose") SFX.defeat(); else SFX.escape();
+}
+function showMap() { $("#endScreen").classList.add("hidden"); G.phase = "map"; renderAimbarMap(); }
+function renderAimbarMap() {
+  const bar = $("#aimbar"); bar.style.setProperty("--tc", "#fde047");
+  bar.innerHTML = `<span class="who">🗺 Vị trí toàn bộ hạm đội (viền vàng = tàu chưa bị bắn chìm)</span><button class="abtn next" data-act="back">↩ Kết quả</button><button class="abtn" data-act="again">↻ Chơi lại</button>`;
+  bar.classList.remove("hidden");
+}
+
+/* =================== Hiệu ứng =================== */
+function banner(text, color, small) { const b = $("#banner"); b.textContent = text; b.style.color = color; b.classList.toggle("small", !!small); b.classList.remove("show"); void b.offsetWidth; b.classList.add("show"); }
+function flash(kind = "white", s = .85) { (kind === "red" ? $("#vignette") : $("#flash")).animate([{ opacity: 0 }, { opacity: s }, { opacity: 0 }], { duration: kind === "red" ? 600 : 260, easing: "ease-out" }); }
+function shake(px = 10, ms = 350) { const k = []; for (let i = 0; i < 8; i++) k.push({ transform: `translate(${rand(-px, px)}px,${rand(-px, px)}px)` }); k.push({ transform: "none" }); $("#boards").animate(k, { duration: ms }); }
+function flyBall(a, b, { duration = 700, arc = -160 } = {}) {
+  return new Promise(res => {
+    const el = document.createElement("div"); el.className = "ball"; document.body.appendChild(el);
+    const t0 = performance.now(); let fin = false;
+    const done = () => { if (fin) return; fin = true; el.remove(); res(); };
+    setTimeout(done, duration + 150);
+    (function step(t) {
+      if (fin) return;
+      const k = Math.min(1, (t - t0) / duration), x = a.x + (b.x - a.x) * k, y = a.y + (b.y - a.y) * k + arc * 4 * k * (1 - k);
+      const sc = 1.3 - .6 * k + .5 * Math.sin(k * Math.PI);
+      el.style.transform = `translate(${x}px,${y}px) translate(-50%,-50%) scale(${sc})`;
+      FX.add({ x: x + rand(-4, 4), y: y + rand(-4, 4), vx: rand(-30, 30), vy: rand(-30, 30), life: rand(.3, .6), fade: .4, size: rand(3, 7), color: pick(["#94a3b8", "#cbd5e1", "#fb923c"]), shrink: true });
+      if (k < 1) requestAnimationFrame(step); else done();
+    })(t0);
+  });
+}
+
+/* =================== Soạn câu hỏi (dùng chung) =================== */
+const SETTINGS_HTML = `
+  <div class="sec">Cài đặt Hải chiến tọa độ</div>
+  <div class="two">
+    <div class="field"><label>Chế độ</label><select data-k="mode"><option value="1">Cả lớp</option><option value="2">2 đội đối kháng</option></select></div>
+    <div class="field"><label>Bản đồ</label><select data-k="size"><option value="7">−3 … 3 (7×7)</option><option value="9">−4 … 4 (9×9)</option><option value="11">−5 … 5 (11×11)</option></select></div>
+    <div class="field"><label>Giây / câu (0 = không giới hạn)</label><input data-k="time" type="number" min="0" max="900"></div>
+    <div class="field"><label>Phát bắn / câu đúng</label><input data-k="shots" type="number" min="1" max="5"></div>
+    <div class="field"><label>Giáp tàu mẹ (cả lớp)</label><input data-k="armor" type="number" min="1" max="10"></div>
+    <div class="field"><label>Lượt radar mỗi đội</label><input data-k="radar" type="number" min="0" max="5"></div>
+  </div>
+  <div class="field"><label>Tên 2 hạm đội</label><div class="tnames">${TEAM_DEF.map((d, i) => `<input data-t="${i}" maxlength="24" style="--tc:${d.c}">`).join("")}</div></div>
+  <label class="chk"><input data-k="bonusHit" type="checkbox"> Bắn trúng được thêm 1 phát</label>
+  <label class="chk"><input data-k="steal" type="checkbox"> Cho phép cướp lượt (2 đội)</label>
+  <label class="chk"><input data-k="showCoord" type="checkbox"> Hiện tọa độ khi rê chuột / di chuyển</label>
+  <label class="chk"><input data-k="shuffleQ" type="checkbox"> Trộn thứ tự câu hỏi</label>
+  <label class="chk"><input data-k="shuffleA" type="checkbox"> Trộn thứ tự phương án A–D</label>`;
+function openEditor() {
+  if (["resolving", "firing"].includes(G.phase)) return;
+  if (["question", "result", "steal", "aim", "aimdone"].includes(G.phase) && !confirm("Dừng trận đang chơi để soạn câu hỏi?")) return;
+  stopTimer(); G.phase = "editor";
+  $("#intro").classList.add("hidden"); $("#endScreen").classList.add("hidden");
+  QB.openEditor({
+    title: "✎ Soạn câu hỏi & cài đặt — Hải chiến tọa độ",
+    settingsHtml: SETTINGS_HTML,
+    fill(root) {
+      root.querySelectorAll("[data-k]").forEach(e => { const v = S[e.dataset.k]; if (e.type === "checkbox") e.checked = !!v; else e.value = v; });
+      root.querySelectorAll("[data-t]").forEach(e => e.value = S.teamNames[+e.dataset.t] || TEAM_DEF[+e.dataset.t].name);
+    },
+    read(root) {
+      const o = { ...S };
+      root.querySelectorAll("[data-k]").forEach(e => {
+        const k = e.dataset.k;
+        if (e.type === "checkbox") o[k] = e.checked;
+        else if (e.tagName === "SELECT") o[k] = +e.value;
+        else { const v = Math.round(+e.value); o[k] = Number.isFinite(v) ? Math.min(+e.max || 999, Math.max(+e.min || 0, v)) : DEF[k]; }
+      });
+      o.teamNames = [...root.querySelectorAll("[data-t]")].map((e, i) => e.value.trim() || TEAM_DEF[i].name);
+      return o;
+    },
+    reset(root) { const keep = S; S = { ...DEF, teamNames: DEF.teamNames.slice() }; this.fill(root); S = keep; },
+    onSave(settings) { S = settings; saveS(); },
+    onClose() { newGame(); showIntro(); }
+  });
+}
+
+/* =================== Sự kiện =================== */
+$("#answers").addEventListener("click", e => {
+  const b = e.target.closest(".ans"); if (b) return choose(+b.dataset.i);
+  const j = e.target.closest(".jbtn"); if (!j) return;
+  if (j.dataset.act === "show") showShortAnswer(); else judgeShort(j.dataset.act === "ok");
+});
+$("#rsFoot").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const a = b.dataset.act;
+  if (a === "aim") enterAim(); else if (a === "next") next(); else if (a === "steal") doSteal(true); else if (a === "nosteal") doSteal(false);
+});
+$("#aimbar").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const a = b.dataset.act;
+  if (a === "fire") fireAtInputs();
+  else if (a === "radar") { G.radarMode = !G.radarMode; drawCursor(); renderAimbar(G.radarMode ? "📡 Chọn tâm vùng 3×3 cần soi (bấm lại để huỷ)." : ""); }
+  else if (a === "next") next();
+  else if (a === "back") { $("#aimbar").classList.add("hidden"); $("#endScreen").classList.remove("hidden"); G.phase = "end"; }
+  else if (a === "again") { G.phase = "end"; startGame(); }
+});
+$("#aimbar").addEventListener("input", e => {
+  if (e.target.id !== "inX" && e.target.id !== "inY") return;
+  const n = targetOf(G.shooter).n, x = Math.round(+$("#inX").value), y = Math.round(+$("#inY").value);
+  if (Number.isFinite(x) && Number.isFinite(y) && Math.abs(x) <= n && Math.abs(y) <= n) { G.cursor = { x, y }; drawCursor(); }
+});
+$("#aimbar").addEventListener("keydown", e => { if (e.key === "Enter" && (e.target.id === "inX" || e.target.id === "inY")) { e.preventDefault(); e.stopPropagation(); fireAtInputs(); } });
+$("#boards").addEventListener("click", e => {
+  if (G.phase !== "aim") return;
+  const p = e.target.closest(".pt"), svg = e.target.closest("svg"); if (!p || !svg) return;
+  if (G.boards[+svg.dataset.b] !== targetOf(G.shooter)) return;
+  const x = +p.dataset.x, y = +p.dataset.y;
+  G.cursor = { x, y }; drawCursor(); syncInputs(); act(x, y);
+});
+$("#boards").addEventListener("mouseover", e => {
+  if (G.phase !== "aim") return;
+  const p = e.target.closest(".pt"), svg = e.target.closest("svg"); if (!p || !svg || G.boards[+svg.dataset.b] !== targetOf(G.shooter)) return;
+  const x = +p.dataset.x, y = +p.dataset.y;
+  if (x !== G.cursor.x || y !== G.cursor.y) { G.cursor = { x, y }; drawCursor(); syncInputs(); }
+});
+$("#btnStart").addEventListener("click", startGame);
+$("#btnAgain").addEventListener("click", startGame);
+$("#btnMap").addEventListener("click", showMap);
+["#btnEdit", "#btnEdit2", "#btnEdit3"].forEach(s => $(s).addEventListener("click", openEditor));
+document.querySelectorAll("#modeSeg button").forEach(b => b.addEventListener("click", () => setOpt("mode", +b.dataset.v)));
+document.querySelectorAll("#sizeSeg button").forEach(b => b.addEventListener("click", () => setOpt("size", +b.dataset.v)));
+function toggleMute() { A.init(); $("#btnMute").textContent = A.toggle() ? "🔇" : "🔊"; }
+function toggleFull() { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {}); else document.exitFullscreen?.(); }
+$("#btnMute").addEventListener("click", toggleMute);
+$("#btnFull").addEventListener("click", toggleFull);
+
+addEventListener("keydown", e => {
+  if (QB.editorOpen()) return;
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+  const inInput = e.target && e.target.tagName === "INPUT";
+  const k = e.key.toLowerCase();
+  if (G.phase === "question") {
+    const r = G.rounds[G.idx];
+    if (r.kind === "short") {
+      if (k === "enter" || k === " ") { e.preventDefault(); showShortAnswer(); return; }
+      if (k === "1" || k === "y") { e.preventDefault(); judgeShort(true); return; }
+      if (k === "2" || k === "s" || k === "n") { e.preventDefault(); judgeShort(false); return; }
+    } else if (r.kind === "tf") {
+      const map = { "1": 0, a: 0, d: 0, "2": 1, b: 1, s: 1 }; if (k in map) { e.preventDefault(); choose(map[k]); return; }
+    } else {
+      const map = { a: 0, b: 1, c: 2, d: 3, "1": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 5 };
+      if (k in map && map[k] < r.opts.length) { e.preventDefault(); choose(map[k]); return; }
+    }
+  }
+  if (G.phase === "steal") { if (k === "1") { e.preventDefault(); doSteal(true); } else if (k === "0" || k === "escape" || k === "n") { e.preventDefault(); doSteal(false); } return; }
+  if (G.phase === "aim" && !inInput) {
+    const mv = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, 1], arrowdown: [0, -1] }[k];
+    if (mv) { e.preventDefault(); moveCursor(...mv); return; }
+    if (k === "enter" || k === " ") { e.preventDefault(); act(G.cursor.x, G.cursor.y); return; }
+    if (k === "r" && G.teams[G.shooter].radar > 0) { G.radarMode = !G.radarMode; drawCursor(); renderAimbar(G.radarMode ? "📡 Chọn tâm vùng 3×3 cần soi." : ""); return; }
+    if (k === "escape" && G.radarMode) { G.radarMode = false; drawCursor(); renderAimbar(); return; }
+  }
+  if (inInput) return;
+  if (k === "f") return toggleFull();
+  if (k === "m") return toggleMute();
+  if (k === "e") return openEditor();
+  if (k === " " || k === "enter" || k === "arrowright") {
+    if (G.phase === "result") {
+      e.preventDefault();
+      const b = $("#rsFoot button"); if (b) b.click();
+    } else if (G.phase === "aimdone") { e.preventDefault(); next(); }
+    else if (G.phase === "intro" || G.phase === "end") { e.preventDefault(); startGame(); }
+  }
+});
+
+/* =================== Khởi động =================== */
+newGame();
+showIntro();
+QB.imagesReady.then(() => {});
+</script>
+</body>
+</html>
