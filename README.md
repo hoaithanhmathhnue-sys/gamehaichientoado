@@ -20,7 +20,7 @@ Chạy hoàn toàn trên trình duyệt — không cần tài khoản, không c�
 
 ## Cách dùng nhanh
 
-1. Mở `index.html` bằng Chrome hoặc Edge.
+1. Mở `index.html` bằng Chrome hoặc Edge → màn hình giới thiệu **Hải Chiến Tọa Độ — Đại Chiến Biển Cả** hiện ra, bấm **⚓ VÀO GAME** (hoặc `Enter`).
 2. Bấm **✎ Câu hỏi** → **📄 Nhập file Word (.docx)** hoặc tự gõ câu hỏi → **Lưu**.
 3. Chọn **Cả lớp / 2 đội** và kích thước bản đồ → **Ra khơi!** Nhấn `F` để chiếu toàn màn hình.
 
@@ -34,6 +34,7 @@ ngắm bắn: bấm vào điểm hoặc `←↑→↓` rồi `Enter` · `R` rada
 ```
 index.html              # game (giao diện + luật chơi)
 favicon.svg
+assets/gioi-thieu.jpg   # ảnh màn hình giới thiệu (đã nén ~370 KB)
 lib/qbank.js            # ngân hàng câu hỏi, khung soạn đề, âm thanh, hiệu ứng
 lib/mtef2tex.js         # đọc công thức MathType / Equation 3.0 -> LaTeX
 lib/docx-import.js      # đọc đề Word (.docx)
