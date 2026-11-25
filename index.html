@@ -45,6 +45,9 @@ button{font:inherit;cursor:pointer}
 .bhead .armor{display:flex;gap:3px}
 .bhead .armor i{display:inline-block;width:.9em;height:.9em;border-radius:3px;background:#22c55e;border:2px solid #bbf7d0}
 .bhead .armor i.off{background:#475569;border-color:#64748b}
+.bhead .mod{border-radius:999px;padding:2px 9px;font-size:.82em;font-weight:900;white-space:nowrap}
+.bhead .mod.bon{background:#14532d;color:#bbf7d0;border:1.5px solid #4ade80}
+.bhead .mod.pen{background:#7f1d1d;color:#fecaca;border:1.5px solid #f87171}
 .board.target .bhead{border-color:#fde047;box-shadow:0 0 0 4px rgba(253,224,71,.25)}
 .board.dim{filter:saturate(.6) brightness(.8)}
 .board svg{display:block;height:calc(100vh - 56px - 92px - 70px);width:auto;max-width:94vw;border-radius:18px;
@@ -64,6 +67,14 @@ button{font:inherit;cursor:pointer}
 .mk-miss .c2{fill:#e0f2fe;stroke:none}
 .mk-hit .ring{fill:#ef4444;stroke:#7f1d1d;stroke-width:3}
 .mk-hit text{font-size:24px;text-anchor:middle;pointer-events:none}
+.mk-sp .ring{stroke-width:3.5}
+.mk-sp text{font-size:23px;text-anchor:middle;pointer-events:none}
+.mk-gift .ring{fill:#15803d;stroke:#fde047}
+.mk-beacon .ring{fill:#0369a1;stroke:#67e8f9}
+.mk-pirate .ring{fill:#581c87;stroke:#fb7185}
+.mk-mine .ring{fill:#991b1b;stroke:#fb923c}
+.mk-sp.rev{opacity:.72}
+.mk-sp.rev .ring{stroke-dasharray:6 4}
 .ship{fill:#334155;stroke:#0f172a;stroke-width:3}
 .ship-deck{fill:#64748b}
 .ship.reveal{fill:rgba(253,224,71,.18);stroke:#fde047;stroke-dasharray:8 6}
@@ -232,20 +243,54 @@ img.qimg.fig{float:right;max-width:36%;margin:0 0 .4em 1.2vw;border:2px solid #e
 .sp-hint{color:#e0f2fe;font-weight:700;font-size:clamp(13px,1.2vw,20px);text-shadow:0 2px 4px rgba(2,6,23,.8);animation:spIn .9s .7s both ease-out}
 @keyframes spIn{from{opacity:0;transform:translateY(30px) scale(.9)}to{opacity:1;transform:none}}
 @keyframes spPulse{0%,100%{box-shadow:0 8px 0 #b45309,0 0 0 4px #fff,0 0 0 0 rgba(253,224,71,.7)}50%{box-shadow:0 8px 0 #b45309,0 0 0 4px #fff,0 0 0 18px rgba(253,224,71,0)}}
-@media (max-width:820px){.answers{grid-template-columns:1fr}.brand .txt{display:none}#boards{flex-direction:column;align-items:center}#boards.two .board svg{max-width:94vw;height:38vh}}
+/* Chế độ 3D tích hợp */
+.brand .tag3d{font-size:.58em;padding:2px 7px;border-radius:7px;background:linear-gradient(135deg,#fde047,#f59e0b);color:#1e293b;letter-spacing:.04em}
+.tool.v3d{background:linear-gradient(135deg,rgba(14,165,233,.4),rgba(37,99,235,.45));border-color:rgba(125,211,252,.65)}
+.tool.v3d:hover{background:linear-gradient(135deg,rgba(14,165,233,.65),rgba(37,99,235,.7))}
+.tool.cam{background:rgba(56,189,248,.22);border-color:rgba(125,211,252,.5)}
+.tool.cam:hover{background:rgba(56,189,248,.38)}
+#stage3d{position:fixed;inset:0;z-index:1;overflow:hidden;cursor:grab}
+#stage3d.aiming{cursor:crosshair}
+#stage3d.dragging{cursor:grabbing}
+#stage3d canvas{display:block;width:100%;height:100%}
+body.mode3d #boards{display:none!important}
+body.mode3d::before{display:none}
+#hudBoards{position:fixed;top:62px;left:0;right:0;z-index:15;pointer-events:none;display:flex;justify-content:center;gap:10px;padding:0 1.2vw;flex-wrap:wrap}
+#hudBoards .bhead{pointer-events:auto;margin-bottom:0;gap:8px;padding:5px 12px;font-size:clamp(12px,1.02vw,18px);background:rgba(2,6,23,.72);backdrop-filter:blur(8px);border:2.5px solid rgba(186,230,253,.28);box-shadow:0 8px 24px rgba(2,6,23,.38);transition:border-color .25s,box-shadow .25s,opacity .25s}
+#hudBoards .bhead.target{border-color:#fde047;box-shadow:0 0 0 4px rgba(253,224,71,.28),0 10px 26px rgba(2,6,23,.48)}
+#hudBoards .bhead.dim{opacity:.68}
+#intro .card{padding:clamp(14px,1.8vw,26px)}
+#intro .subtitle{margin:.35em 0 .65em}
+#intro .segs{margin-bottom:10px}
+#intro .rules{gap:5px;margin-bottom:10px;max-width:830px}
+#intro .rule{padding:5px 12px;font-size:clamp(12.5px,1.08vw,17.5px)}
+#intro .stats{gap:7px;margin-bottom:12px}
+#intro .stat{padding:4px 12px;font-size:clamp(12px,1.02vw,17px)}
+#camHint{position:fixed;right:14px;bottom:84px;z-index:14;pointer-events:none;background:rgba(2,6,23,.62);color:#bae6fd;border:1px solid rgba(186,230,253,.24);border-radius:12px;padding:5px 11px;font-size:clamp(11px,.9vw,14px);font-weight:700;backdrop-filter:blur(6px)}
+#spLegend{position:fixed;left:14px;bottom:84px;z-index:14;pointer-events:none;display:flex;gap:7px;flex-wrap:wrap;max-width:46vw;background:rgba(2,6,23,.62);color:#e2e8f0;border:1px solid rgba(186,230,253,.24);border-radius:12px;padding:5px 11px;font-size:clamp(11px,.9vw,14px);font-weight:700;backdrop-filter:blur(6px)}
+#spLegend span{white-space:nowrap}
+@media (max-width:820px){.answers{grid-template-columns:1fr}.brand .txt{display:none}#boards{flex-direction:column;align-items:center}#boards.two .board svg{max-width:94vw;height:38vh}#camHint,#spLegend{display:none}}
 </style>
 </head>
 <body>
 
+<div id="stage3d" class="hidden" aria-label="Sân khấu Hải chiến tọa độ 3D"></div>
+
 <header class="topbar">
-  <div class="brand"><span class="logo">⚓</span><span class="txt">HẢI CHIẾN TỌA ĐỘ</span></div>
+  <div class="brand"><span class="logo">⚓</span><span class="txt">HẢI CHIẾN TỌA ĐỘ</span><span id="tag3d" class="tag3d hidden">3D</span></div>
   <div class="progress"><span id="qCounter" class="chip">Lượt 0/0</span><span id="hitCounter" class="chip">💥 0 trúng</span></div>
   <div class="tools">
+    <button id="btnView" class="tool v3d" title="Chuyển giữa chế độ 2D và 3D (phím T)">🌊 Chế độ 3D</button>
+    <button id="btnCam" class="tool cam hidden" title="Đổi góc nhìn 3D (phím V)">🎥 3D Chiến thuật</button>
     <button id="btnEdit" class="tool" title="Soạn câu hỏi, nhập file Word, cài đặt (E)">✎ Câu hỏi</button>
     <button id="btnMute" class="tool" title="Bật/tắt âm thanh (M)">🔊</button>
     <button id="btnFull" class="tool" title="Toàn màn hình (F)">⛶</button>
   </div>
 </header>
+
+<div id="hudBoards" class="hidden"></div>
+<div id="spLegend" class="hidden"><span>🎁 Quà: +1 phát</span><span>·</span><span>📡 Phao: soi 3×3</span><span>·</span><span>🏴‍☠️ Cướp biển: −1 phát</span><span>·</span><span>💣 Thủy lôi: nổ ngược</span></div>
+<div id="camHint" class="hidden">🖱 Kéo xoay 3D · Cuộn thu phóng · Phím <b>V</b> đổi góc máy · <b>T</b> đổi 2D/3D</div>
 
 <main id="boards"></main>
 
@@ -300,6 +345,7 @@ img.qimg.fig{float:right;max-width:36%;margin:0 0 .4em 1.2vw;border:2px solid #e
     <div class="segs">
       <div id="modeSeg" class="seg" aria-label="Chế độ chơi"><button data-v="1">👥 Cả lớp</button><button data-v="2">⚔ 2 đội đối kháng</button></div>
       <div id="sizeSeg" class="seg" aria-label="Kích thước bản đồ"><button data-v="7">−3 … 3</button><button data-v="9">−4 … 4</button><button data-v="11">−5 … 5</button></div>
+      <div id="viewSeg" class="seg" aria-label="Chế độ hiển thị 2D/3D"><button data-v="0">🗺 2D</button><button data-v="1">🌊 3D</button></div>
     </div>
     <div id="rules" class="rules"></div>
     <div id="introStats" class="stats"></div>
@@ -308,7 +354,7 @@ img.qimg.fig{float:right;max-width:36%;margin:0 0 .4em 1.2vw;border:2px solid #e
       <button id="btnEdit2" class="big ghost">✎ Soạn / nhập đề Word</button>
     </div>
     <div class="keys">Trả lời: <kbd>A</kbd>–<kbd>D</kbd> / <kbd>1</kbd>–<kbd>4</kbd> · Đúng/Sai: <kbd>1</kbd> <kbd>2</kbd> · Trả lời ngắn: <kbd>Enter</kbd> xem đáp án, <kbd>1</kbd> đúng, <kbd>2</kbd> sai<br>
-      Ngắm bắn: bấm vào điểm trên bản đồ, hoặc <kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> rồi <kbd>Enter</kbd> · <kbd>R</kbd> radar · <kbd>Space</kbd> tiếp tục · <kbd>F</kbd> toàn màn hình · <kbd>M</kbd> âm thanh</div>
+      Ngắm bắn: bấm vào điểm, hoặc <kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> + <kbd>Enter</kbd> · <kbd>T</kbd> đổi 2D/3D · <kbd>V</kbd> góc máy 3D · <kbd>R</kbd> radar · <kbd>Space</kbd> tiếp · <kbd>F</kbd> toàn màn · <kbd>M</kbd> âm thanh</div>
   </div>
 </div>
 
@@ -327,6 +373,8 @@ img.qimg.fig{float:right;max-width:36%;margin:0 0 .4em 1.2vw;border:2px solid #e
   </div>
 </div>
 
+<script src="lib/three.min.js"></script>
+<script src="lib/sea3d.js"></script>
 <script src="lib/qbank.js"></script>
 <script>
 "use strict";
@@ -354,7 +402,10 @@ const SFX = {
   alarm() { A.seq([[740, 0, .22], [554, .22, .22], [740, .44, .22], [554, .66, .22]], { type: "sawtooth", vol: .07 }); },
   victory() { A.seq([[523, 0, .12], [659, .12, .12], [784, .24, .12], [1046, .36, .3], [880, .72, .14], [988, .86, .14], [1046, 1.0, .14], [1318, 1.14, .9]], { type: "triangle", vol: .26 }); A.seq([[262, 0, .34], [330, .36, .34], [349, .72, .4], [392, 1.14, .9]], { type: "square", vol: .06 }); },
   defeat() { A.seq([[392, 0, .32], [370, .32, .32], [349, .64, .32], [311, .96, 1.0]], { type: "sawtooth", vol: .11, vib: 5 }); },
-  escape() { A.seq([[523, 0, .15], [440, .16, .15], [392, .32, .5]], { type: "triangle", vol: .2 }); }
+  escape() { A.seq([[523, 0, .15], [440, .16, .15], [392, .32, .5]], { type: "triangle", vol: .2 }); },
+  gift() { A.seq([[587, 0, .1], [784, .09, .1], [988, .18, .12], [1175, .28, .28], [1568, .42, .35]], { type: "triangle", vol: .26 }); },
+  pirate() { A.seq([[311, 0, .16], [294, .14, .16], [262, .28, .18], [196, .46, .42]], { type: "sawtooth", vol: .16 }); A.noise({ dur: .28, vol: .18, type: "bandpass", freq: 620, to: 220 }); },
+  mine() { A.noise({ dur: 1.05, vol: .72, type: "lowpass", freq: 2400, to: 65 }); A.tone(110, { dur: .85, type: "sawtooth", vol: .28, to: 32 }); }
 };
 
 /* =================== Cài đặt =================== */
@@ -362,9 +413,17 @@ const TEAM_DEF = [
   { name: "Hạm đội Đỏ", c: "#ef4444" },
   { name: "Hạm đội Xanh", c: "#2563eb" }
 ];
-const DEF = { mode: 2, size: 9, time: 30, shots: 2, bonusHit: true, armor: 5, radar: 1, steal: true, showCoord: true, shuffleQ: false, shuffleA: false, teamNames: TEAM_DEF.map(t => t.name) };
-let S = QB.getSettings("haichien", DEF);
+const DEF = { mode: 2, size: 9, time: 30, shots: 2, bonusHit: true, armor: 5, radar: 1, steal: true, showCoord: true, view3d: false, specials: true, gifts: 3, beacons: 1, pirates: 3, mines: 2, shuffleQ: false, shuffleA: false, teamNames: TEAM_DEF.map(t => t.name) };
+let S = { ...DEF, ...QB.getSettings("haichien", DEF) };
 const saveS = () => QB.saveSettings("haichien", S);
+let view3DActive = false;
+const is3D = () => view3DActive;
+const SP_META = {
+  gift:   { icon: "🎁", name: "Rương Quà", cls: "mk-gift" },
+  beacon: { icon: "📡", name: "Phao Radar", cls: "mk-beacon" },
+  pirate: { icon: "🏴‍☠️", name: "Tàu Cướp Biển", cls: "mk-pirate" },
+  mine:   { icon: "💣", name: "Thủy Lôi", cls: "mk-mine" }
+};
 const FLEETS = {
   7: [[3, "Tuần dương hạm"], [3, "Tàu ngầm"], [2, "Khu trục hạm"], [2, "Tàu tuần tra"]],
   9: [[4, "Thiết giáp hạm"], [3, "Tuần dương hạm"], [3, "Tàu ngầm"], [2, "Khu trục hạm"], [2, "Tàu tuần tra"]],
@@ -403,9 +462,27 @@ function placeFleet(n, fleet) {
   }
   throw new Error("Không xếp được tàu");
 }
+function placeSpecials(n, ships) {
+  const specials = {};
+  if (!S.specials) return specials;
+  const shipSet = new Set();
+  ships.forEach(sh => sh.cells.forEach(([x, y]) => shipSet.add(x + "," + y)));
+  const free = [];
+  for (let x = -n; x <= n; x++) for (let y = -n; y <= n; y++) if (!shipSet.has(x + "," + y)) free.push(x + "," + y);
+  for (let i = free.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [free[i], free[j]] = [free[j], free[i]]; }
+  const pool = [
+    ...Array(Math.max(0, +S.gifts || 0)).fill("gift"),
+    ...Array(Math.max(0, +S.beacons || 0)).fill("beacon"),
+    ...Array(Math.max(0, +S.pirates || 0)).fill("pirate"),
+    ...Array(Math.max(0, +S.mines || 0)).fill("mine")
+  ];
+  const limit = Math.min(pool.length, Math.max(0, free.length - 4));
+  for (let i = 0; i < limit; i++) specials[free[i]] = pool[i];
+  return specials;
+}
 function newBoard(owner) {
-  const n = (S.size - 1) / 2;
-  return { owner, n, ships: placeFleet(n, FLEETS[S.size]), shots: {}, radar: [], reveal: false };
+  const n = (S.size - 1) / 2, ships = placeFleet(n, FLEETS[S.size]);
+  return { owner, n, ships, specials: placeSpecials(n, ships), shots: {}, radar: [], reveal: false };
 }
 const shipAt = (b, x, y) => b.ships.find(s => s.cells.some(([cx, cy]) => cx === x && cy === y));
 const fleetLeft = b => b.ships.filter(s => !s.sunk).length;
@@ -417,14 +494,83 @@ function newGame() {
   const qs = QB.parse(QB.getText()).questions;
   G.rounds = QB.buildRounds(qs, { shuffleQ: S.shuffleQ, shuffleA: S.shuffleA });
   const mode = +S.mode === 1 ? 1 : 2;
+  const mkTeam = (base) => ({ ...base, shots: 0, hits: 0, sunk: 0, radar: +S.radar, correct: 0, answered: 0, steals: 0, gifts: 0, traps: 0, shotPenalty: 0, shotBonus: 0 });
   G.teams = mode === 1
-    ? [{ name: "Cả lớp", c: "#0ea5e9", shots: 0, hits: 0, sunk: 0, radar: +S.radar, correct: 0, answered: 0, steals: 0 }]
-    : TEAM_DEF.map((d, i) => ({ ...d, name: (S.teamNames[i] || d.name).trim() || d.name, shots: 0, hits: 0, sunk: 0, radar: +S.radar, correct: 0, answered: 0, steals: 0 }));
+    ? [mkTeam({ name: "Cả lớp", c: "#0ea5e9" })]
+    : TEAM_DEF.map((d, i) => mkTeam({ ...d, name: (S.teamNames[i] || d.name).trim() || d.name }));
   G.boards = mode === 1 ? [newBoard(-1)] : [newBoard(0), newBoard(1)];
   Object.assign(G, { idx: 0, cur: 0, actor: 0, shooter: 0, shotsLeft: 0, stealUsed: false, stealing: false, cursor: { x: 0, y: 0 }, radarMode: false, armor: +S.armor, maxArmor: +S.armor });
   hideCard(); $("#aimbar").classList.add("hidden");
+  if (window.Sea3D) Sea3D.markDirty();
+  applyViewMode(!!S.view3d, { silent: true });
   renderBoards();
   updateCounters();
+}
+
+/* =================== Chuyển đổi 2D ↔ 3D trực tiếp =================== */
+const SEA3D_HOOKS = {
+  getState: () => G,
+  getSettings: () => S,
+  isSplashOpen: () => splashOpen(),
+  fmt, P,
+  onHoverCell(x, y) {
+    if (G.phase !== "aim") return;
+    if (x !== G.cursor.x || y !== G.cursor.y) { G.cursor = { x, y }; drawCursor(); syncInputs(); }
+  },
+  onClickCell(x, y) {
+    if (G.phase !== "aim") return;
+    G.cursor = { x, y }; drawCursor(); syncInputs(); act(x, y);
+  }
+};
+function renderHud3D() {
+  if (!is3D()) return;
+  const aiming = G.phase === "aim";
+  $("#hudBoards").innerHTML = G.boards.map((b, i) => {
+    const isT = aiming && targetOf(G.shooter) === b;
+    const cls = isT ? " target" : (aiming ? " dim" : "");
+    return `<div class="bhead${cls}" id="hud3d-${i}">${boardHead(b, i)}</div>`;
+  }).join("");
+  $("#spLegend").classList.toggle("hidden", !S.specials);
+}
+function applyViewMode(want3d, { silent = false } = {}) {
+  let ok = false;
+  if (want3d && window.Sea3D) {
+    ok = Sea3D.setActive(true, $("#stage3d"), SEA3D_HOOKS);
+    if (!ok) {
+      S.view3d = false; saveS();
+      if (!silent) banner("⚠ Thiết bị chưa bật WebGL — giữ chế độ 2D", "#f59e0b", true);
+    }
+  } else if (window.Sea3D) {
+    Sea3D.setActive(false);
+  }
+  view3DActive = ok;
+  document.body.classList.toggle("mode3d", ok);
+  $("#stage3d").classList.toggle("hidden", !ok);
+  $("#hudBoards").classList.toggle("hidden", !ok);
+  $("#camHint").classList.toggle("hidden", !ok);
+  $("#spLegend").classList.toggle("hidden", !ok || !S.specials);
+  $("#btnCam").classList.toggle("hidden", !ok);
+  $("#tag3d").classList.toggle("hidden", !ok);
+  $("#btnView").textContent = ok ? "🗺 Chế độ 2D" : "🌊 Chế độ 3D";
+  if (ok && window.Sea3D) {
+    $("#btnCam").textContent = Sea3D.getCamLabel();
+    renderHud3D();
+    Sea3D.markTarget();
+  } else {
+    renderBoards();
+  }
+  document.querySelectorAll("#viewSeg button").forEach(b => b.classList.toggle("on", !!+b.dataset.v === ok));
+  const bs = $("#btnStart"); if (bs) bs.textContent = ok ? "🚀 Ra khơi 3D!" : "🚀 Ra khơi!";
+}
+function toggleView3D(forceVal) {
+  if (["firing", "resolving"].includes(G.phase)) return;
+  const next = forceVal !== undefined ? !!forceVal : !S.view3d;
+  S.view3d = next; saveS();
+  A.init(); SFX.click();
+  applyViewMode(next, { silent: false });
+  if (G.phase === "intro") showIntro();
+  else if (G.phase === "map") renderAimbarMap();
+  else if (!["intro", "end"].includes(G.phase)) banner(is3D() ? "🌊 CHẾ ĐỘ 3D ĐẠI DƯƠNG" : "🗺 CHẾ ĐỘ 2D OXY", "#38bdf8", true);
 }
 
 /* =================== Vẽ bản đồ tọa độ =================== */
@@ -454,44 +600,62 @@ function boardSVG(b, bi) {
   }
   // radar
   for (const r of b.radar) {
-    s += `<g class="radar"><rect x="${X(r.x - 1) - U / 2}" y="${Y(r.y + 1) - U / 2}" width="${3 * U}" height="${3 * U}" rx="14"/><text x="${X(r.x)}" y="${Y(r.y) + 11}">📡${r.count}</text></g>`;
+    const xMin = Math.max(-n, r.x - 1), xMax = Math.min(n, r.x + 1);
+    const yMin = Math.max(-n, r.y - 1), yMax = Math.min(n, r.y + 1);
+    const rx = X(xMin) - U / 2, ry = Y(yMax) - U / 2;
+    const rw = (xMax - xMin + 1) * U, rh = (yMax - yMin + 1) * U;
+    s += `<g class="radar"><rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" rx="14"/><text x="${rx + 40}" y="${ry + 32}" font-size="24">📡${r.count}</text></g>`;
   }
   // các điểm nguyên
   for (let x = -n; x <= n; x++) for (let y = -n; y <= n; y++) {
-    const k = x + "," + y, shot = b.shots[k];
+    const k = x + "," + y, shot = b.shots[k], sp = b.specials && b.specials[k];
     s += `<g class="pt" data-x="${x}" data-y="${y}"><circle class="hitzone" cx="${X(x)}" cy="${Y(y)}" r="${U / 2}"/>`;
     if (shot === "miss") s += `<g class="mk-miss"><circle cx="${X(x)}" cy="${Y(y)}" r="11"/><circle class="c2" cx="${X(x)}" cy="${Y(y)}" r="4"/></g>`;
     else if (shot === "hit") s += `<g class="mk-hit"><circle class="ring" cx="${X(x)}" cy="${Y(y)}" r="16"/><text x="${X(x)}" y="${Y(y) + 8}">🔥</text></g>`;
+    else if (shot && SP_META[shot]) s += `<g class="mk-sp ${SP_META[shot].cls}"><circle class="ring" cx="${X(x)}" cy="${Y(y)}" r="17"/><text x="${X(x)}" y="${Y(y) + 8}">${SP_META[shot].icon}</text></g>`;
+    else if (!shot && b.reveal && sp && SP_META[sp]) s += `<g class="mk-sp ${SP_META[sp].cls} rev"><circle class="ring" cx="${X(x)}" cy="${Y(y)}" r="16"/><text x="${X(x)}" y="${Y(y) + 8}">${SP_META[sp].icon}</text></g>`;
     else s += `<circle class="dot" cx="${X(x)}" cy="${Y(y)}" r="4.5"/>`;
     s += `</g>`;
   }
   s += `<g id="cursor-${bi}" class="cursorg hidden"></g></svg>`;
   return s;
 }
+function modBadges(t) {
+  let out = "";
+  if (t.shotBonus > 0) out += `<span class="mod bon" title="Đạn thưởng từ thủy lôi/quà cho lượt kế tiếp">🎁 +${t.shotBonus} phát</span>`;
+  if (t.shotPenalty > 0) out += `<span class="mod pen" title="Bị cướp biển trừ phát ở lượt kế tiếp">🏴‍☠️ −${t.shotPenalty} phát</span>`;
+  return out;
+}
 function boardHead(b, bi) {
   const fleet = b.ships.map(sh => `<span class="sh${sh.sunk ? " sunk" : ""}" style="width:${sh.len * .85}em" title="${sh.name} (${sh.len} ô)${sh.sunk ? " — đã chìm" : ""}"></span>`).join("");
   if (!teamMode()) {
     const t = G.teams[0];
     return `<span class="bn">🏴‍☠️ Hạm đội bí ẩn</span><span class="fleet">${fleet}</span>
-      <span class="bst">🎯 ${t.shots} phát · 💥 ${t.hits} trúng</span>
+      <span class="bst">🎯 ${t.shots} phát · 💥 ${t.hits} trúng</span>${modBadges(t)}
       <span class="bn">🛡 Giáp<span class="armor">${Array.from({ length: G.maxArmor }, (_, i) => `<i class="${i < G.armor ? "" : "off"}"></i>`).join("")}</span></span>`;
   }
   const owner = G.teams[b.owner], enemy = G.teams[1 - b.owner];
   return `<span class="bn" style="--tc:${owner.c}"><span class="dot"></span>Vùng biển ${esc(owner.name)}</span><span class="fleet">${fleet}</span>
-    <span class="bst">${esc(enemy.name)}: 🎯 ${enemy.shots} · 💥 ${enemy.hits}</span>`;
+    <span class="bst">${esc(enemy.name)}: 🎯 ${enemy.shots} · 💥 ${enemy.hits}</span>${modBadges(owner)}`;
 }
 function renderBoards() {
   const box = $("#boards");
   box.classList.toggle("two", teamMode());
   box.innerHTML = G.boards.map((b, i) => `<div class="board" id="board-${i}"><div class="bhead" id="bhead-${i}">${boardHead(b, i)}</div>${boardSVG(b, i)}</div>`).join("");
+  if (is3D()) { Sea3D.syncAll(); renderHud3D(); }
   markTarget();
 }
 function refreshBoard(i) {
+  if (is3D()) { Sea3D.syncBoard(i); renderHud3D(); markTarget(); return; }
   const b = G.boards[i], el = $("#board-" + i);
   if (!el) return renderBoards();
   el.querySelector("svg").outerHTML = boardSVG(b, i);
   $("#bhead-" + i).innerHTML = boardHead(b, i);
   markTarget();
+}
+function refreshAllHeads() {
+  G.boards.forEach((b, i) => { const h = $("#bhead-" + i); if (h) h.innerHTML = boardHead(b, i); });
+  if (is3D()) renderHud3D();
 }
 function markTarget() {
   const aiming = G.phase === "aim";
@@ -501,9 +665,11 @@ function markTarget() {
     el.classList.toggle("target", isT);
     el.classList.toggle("dim", aiming && !isT);
   });
+  if (is3D()) { renderHud3D(); Sea3D.markTarget(); }
   drawCursor();
 }
 function drawCursor() {
+  if (is3D()) Sea3D.updateCursor();
   document.querySelectorAll(".cursorg").forEach(g => { g.classList.add("hidden"); g.innerHTML = ""; });
   if (G.phase !== "aim") return;
   const b = targetOf(G.shooter), bi = G.boards.indexOf(b), g = $("#cursor-" + bi);
@@ -525,23 +691,39 @@ function showIntro() {
   const mode = +S.mode, n = (S.size - 1) / 2, fleet = FLEETS[S.size];
   document.querySelectorAll("#modeSeg button").forEach(b => b.classList.toggle("on", +b.dataset.v === mode));
   document.querySelectorAll("#sizeSeg button").forEach(b => b.classList.toggle("on", +b.dataset.v === +S.size));
+  document.querySelectorAll("#viewSeg button").forEach(b => b.classList.toggle("on", !!+b.dataset.v === is3D()));
+  $("#btnStart").textContent = is3D() ? "🚀 Ra khơi 3D!" : "🚀 Ra khơi!";
   $("#introSub").textContent = mode === 1
     ? "Cả lớp chỉ huy chiến hạm, trả lời đúng để nã pháo vào các điểm trên mặt phẳng Oxy và tìm ra hạm đội bí ẩn!"
     : "Hai hạm đội đối đầu: trả lời đúng để nã pháo vào vùng biển của đối thủ. Ai đánh chìm hết tàu địch trước sẽ thắng!";
+  const spParts = [];
+  if (S.specials) {
+    if (+S.gifts > 0) spParts.push("<b>🎁 Quà</b> (+1 phát bắn)");
+    if (+S.beacons > 0) spParts.push("<b>📡 Phao Radar</b> (tự soi 3×3)");
+    if (+S.pirates > 0) spParts.push("<b>🏴‍☠️ Cướp biển</b> (−1 phát bắn)");
+    if (+S.mines > 0) spParts.push(mode === 1 ? "<b>💣 Thủy lôi</b> (−1 giáp)" : "<b>💣 Thủy lôi</b> (đối thủ +1 phát)");
+  }
   const rules = [
     ["✅", `Trả lời đúng → được <b>${S.shots} phát pháo</b>. Đọc tọa độ điểm muốn bắn, ví dụ <b>(2; −3)</b>.`],
     ["💥", "Tàu nằm trên các điểm có tọa độ nguyên, theo hàng ngang hoặc hàng dọc, không chạm nhau." + (S.bonusHit ? " Bắn <b>trúng</b> được thêm 1 phát!" : "")],
+    ...(spParts.length ? [["🎁", "Bẫy & Quà bí ẩn trên biển: " + spParts.join(" · ") + "."]] : []),
     mode === 1 ? ["🛡", `Trả lời sai / hết giờ → hạm đội địch phản công, tàu mẹ mất 1 giáp (có ${S.armor} giáp).`]
       : ["❌", "Trả lời sai / hết giờ → mất lượt bắn." + (S.steal ? " Đội kia được <b>cướp lượt</b>; cướp sai thì đối thủ được bắn 1 phát." : "")],
     ...(+S.radar > 0 ? [["📡", `Mỗi ${mode === 1 ? "lớp" : "đội"} có ${S.radar} lần dùng <b>radar</b>: soi vùng 3×3 xem có bao nhiêu ô tàu (không mất phát bắn).`]] : []),
-    ["🏆", mode === 1 ? "Đánh chìm toàn bộ hạm đội để chiến thắng!" : "Đánh chìm hết tàu đối thủ trước, hoặc bắn trúng nhiều hơn khi hết câu hỏi."]
+    is3D() ? ["🌊", "Đang bật <b>chế độ 3D Đại dương</b> — kéo chuột xoay tự do, bấm <b>V</b> đổi góc máy (có góc <b>Nhìn từ trên Oxy</b>) hoặc bấm <b>T</b> để chuyển nhanh sang 2D bất cứ lúc nào!"]
+      : ["🏆", mode === 1 ? "Đánh chìm toàn bộ hạm đội để chiến thắng! (Có thể bật <b>🌊 Chế độ 3D</b> ở góc trên bất kỳ lúc nào)." : "Đánh chìm hết tàu đối thủ trước, hoặc bắn trúng nhiều hơn khi hết câu hỏi."]
   ];
   $("#rules").innerHTML = rules.map(([i, t]) => `<div class="rule"><span class="ico">${i}</span><span>${t}</span></div>`).join("");
   const qs = QB.parse(QB.getText()).questions;
-  $("#introStats").innerHTML = `<span class="stat">📝 ${qs.length} câu · ${G.rounds.length} lượt</span><span class="stat">🗺 Lưới ${S.size}×${S.size} (x, y từ ${fmt(-n)} đến ${n})</span>`
-    + `<span class="stat">🚢 ${fleet.length} tàu · ${fleet.reduce((s, f) => s + f[0], 0)} ô</span><span class="stat">⏱ ${S.time > 0 ? S.time + " giây/câu" : "Không giới hạn giờ"}</span>`;
+  const giftCnt = S.specials ? (+S.gifts || 0) + (+S.beacons || 0) : 0;
+  const trapCnt = S.specials ? (+S.pirates || 0) + (+S.mines || 0) : 0;
+  $("#introStats").innerHTML = `<span class="stat">📝 ${qs.length} câu · ${G.rounds.length} lượt</span><span class="stat">🗺 Lưới ${S.size}×${S.size} (${fmt(-n)}…${n})</span>`
+    + `<span class="stat">🚢 ${fleet.length} tàu · ${fleet.reduce((s, f) => s + f[0], 0)} ô</span>`
+    + (giftCnt + trapCnt > 0 ? `<span class="stat">🎁 ${giftCnt} quà · 🏴‍☠️ ${trapCnt} bẫy</span>` : "")
+    + `<span class="stat">⏱ ${S.time > 0 ? S.time + " giây/câu" : "Không giới hạn"}</span>`;
   $("#endScreen").classList.add("hidden");
   $("#intro").classList.remove("hidden");
+  if (is3D()) Sea3D.markTarget();
 }
 function setOpt(k, v) { S[k] = v; saveS(); newGame(); showIntro(); A.init(); SFX.click(); }
 
@@ -683,6 +865,20 @@ function showResult(cls, title, body, buttons) {
   setTimeout(() => rs.scrollIntoView({ block: "nearest", behavior: "smooth" }), 60);
   const first = $("#rsFoot button"); if (first) first.focus({ preventScroll: true });
 }
+function grantShots(ti, base) {
+  const t = G.teams[ti];
+  let total = base;
+  const notes = [];
+  if (t.shotBonus > 0) { total += t.shotBonus; notes.push(`+${t.shotBonus} đạn thưởng`); t.shotBonus = 0; }
+  if (t.shotPenalty > 0) {
+    const cut = Math.min(total, t.shotPenalty);
+    total -= cut;
+    t.shotPenalty -= cut;
+    notes.push(`−${cut} phạt cướp biển`);
+  }
+  refreshAllHeads();
+  return { total, notes };
+}
 async function settle(ok, choice) {
   G.phase = "resolving"; stopTimer();
   $("#answers").classList.add("locked");
@@ -691,11 +887,19 @@ async function settle(ok, choice) {
     t.correct++;
     SFX.correct(); banner("CHÍNH XÁC!", "#22c55e");
     revealAnswerButtons();
-    G.shooter = G.actor; G.shotsLeft = +S.shots;
+    G.shooter = G.actor;
+    const gr = grantShots(G.shooter, +S.shots);
+    G.shotsLeft = gr.total;
     if (G.stealing) t.steals++;
     G.phase = "result";
-    showResult("okb", (G.stealing ? `⚡ ${t.name} cướp lượt thành công! ` : "✅ Chính xác! ") + `${teamMode() ? t.name : "Cả lớp"} được bắn ${S.shots} phát.`,
-      answerBody(true), `<button class="big fire" data-act="aim">🎯 Vào vị trí bắn<kbd>Space</kbd></button>`);
+    const noteStr = gr.notes.length ? ` (${gr.notes.join(", ")})` : "";
+    if (G.shotsLeft > 0) {
+      showResult("okb", (G.stealing ? `⚡ ${t.name} cướp lượt thành công! ` : "✅ Chính xác! ") + `${teamMode() ? t.name : "Cả lớp"} được bắn ${G.shotsLeft} phát${noteStr}.`,
+        answerBody(true), `<button class="big fire" data-act="aim">🎯 Vào vị trí bắn<kbd>Space</kbd></button>`);
+    } else {
+      showResult("badb", `✅ Chính xác nhưng ${teamMode() ? t.name : "Cả lớp"} phải trả nợ cướp biển${noteStr} — hết phát bắn lượt này!`,
+        answerBody(true), `<button class="big" data-act="next">${G.idx + 1 >= G.rounds.length ? "Xem kết quả 🏁" : "Câu tiếp theo ▶"}<kbd>Space</kbd></button>`);
+    }
     return;
   }
   SFX.wrong(); banner(choice === null ? "HẾT GIỜ!" : "SAI RỒI!", "#ef4444");
@@ -711,10 +915,18 @@ async function settle(ok, choice) {
   if (G.stealing) {
     // cướp sai -> đội bị cướp lượt được bắn 1 phát
     revealAnswerButtons();
-    G.shooter = 1 - G.actor; G.shotsLeft = 1;
+    G.shooter = 1 - G.actor;
+    const gr = grantShots(G.shooter, 1);
+    G.shotsLeft = gr.total;
     G.phase = "result";
-    showResult("badb", `❌ ${t.name} cướp lượt nhưng chưa đúng — ${G.teams[G.shooter].name} được bắn 1 phát!`, answerBody(false),
-      `<button class="big team" style="--tc:${G.teams[G.shooter].c}" data-act="aim">🎯 ${esc(G.teams[G.shooter].name)} vào vị trí bắn<kbd>Space</kbd></button>`);
+    const noteStr = gr.notes.length ? ` (${gr.notes.join(", ")})` : "";
+    if (G.shotsLeft > 0) {
+      showResult("badb", `❌ ${t.name} cướp lượt nhưng chưa đúng — ${G.teams[G.shooter].name} được bắn ${G.shotsLeft} phát${noteStr}!`, answerBody(false),
+        `<button class="big team" style="--tc:${G.teams[G.shooter].c}" data-act="aim">🎯 ${esc(G.teams[G.shooter].name)} vào vị trí bắn<kbd>Space</kbd></button>`);
+    } else {
+      showResult("badb", `❌ ${t.name} cướp lượt chưa đúng, còn ${G.teams[G.shooter].name} trả nợ cướp biển${noteStr}!`, answerBody(false),
+        `<button class="big" data-act="next">${G.idx + 1 >= G.rounds.length ? "Xem kết quả 🏁" : "Câu tiếp theo ▶"}<kbd>Space</kbd></button>`);
+    }
     return;
   }
   if (canSteal()) {
@@ -755,15 +967,20 @@ function doSteal(yes) {
 async function enemyStrike() {
   SFX.alarm();
   hideCard();
-  const b = $("#board-0 svg").getBoundingClientRect();
-  for (let i = 0; i < 3; i++) {
-    const from = { x: rand(b.left, b.right), y: b.top + 20 }, to = { x: innerWidth / 2 + rand(-200, 200), y: innerHeight + 10 };
-    flyBall(from, to, { duration: 650, arc: -120 });
-    await sleep(160);
+  if (is3D()) {
+    await Sea3D.enemyStrike(0, sleep);
+    SFX.boom(); flash("red", .75);
+  } else {
+    const b = $("#board-0 svg").getBoundingClientRect();
+    for (let i = 0; i < 3; i++) {
+      const from = { x: rand(b.left, b.right), y: b.top + 20 }, to = { x: innerWidth / 2 + rand(-200, 200), y: innerHeight + 10 };
+      flyBall(from, to, { duration: 650, arc: -120 });
+      await sleep(160);
+    }
+    await sleep(600);
+    SFX.boom(); flash("red"); shake(16, 450);
+    FX.burst(innerWidth / 2, innerHeight - 40, { n: 70, colors: ["#fde047", "#f97316", "#ef4444", "#ffffff"], speed: 600, shape: "mix" });
   }
-  await sleep(600);
-  SFX.boom(); flash("red"); shake(16, 450);
-  FX.burst(innerWidth / 2, innerHeight - 40, { n: 70, colors: ["#fde047", "#f97316", "#ef4444", "#ffffff"], speed: 600, shape: "mix" });
   G.armor = Math.max(0, G.armor - 1);
   refreshBoard(0);
   await sleep(700);
@@ -782,6 +999,7 @@ function enterAim() {
     for (let x = -b.n; x <= b.n; x++) for (let y = -b.n; y <= b.n; y++) if (!b.shots[x + "," + y]) { const d = x * x + y * y; if (!best || d < best.d) best = { x, y, d }; }
     if (best) G.cursor = { x: best.x, y: best.y };
   }
+  if (is3D()) Sea3D.resetOrbit();
   markTarget(); renderAimbar();
   const t = G.teams[G.shooter];
   banner("🎯 " + (teamMode() ? t.name : "Ngắm bắn!"), teamMode() ? t.c : "#fde047", true);
@@ -815,14 +1033,15 @@ function act(x, y) { if (G.radarMode) useRadar(x, y); else fire(x, y); }
 
 function useRadar(x, y) {
   if (G.phase !== "aim") return;
-  const t = G.teams[G.shooter], b = targetOf(G.shooter);
+  const t = G.teams[G.shooter], b = targetOf(G.shooter), bi = G.boards.indexOf(b);
   if (t.radar <= 0) return;
   t.radar--; G.radarMode = false;
   let count = 0;
   for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) { const px = x + dx, py = y + dy; if (Math.abs(px) <= b.n && Math.abs(py) <= b.n && shipAt(b, px, py) && b.shots[px + "," + py] !== "hit") count++; }
   b.radar.push({ x, y, count });
   SFX.radar();
-  refreshBoard(G.boards.indexOf(b));
+  if (is3D()) Sea3D.fxImpact("radar", bi, x, y);
+  refreshBoard(bi);
   banner(`📡 ${count} ô tàu quanh ${P(x, y)}`, "#4ade80", true);
   renderAimbar(`Radar quanh ${P(x, y)}: ${count ? count + " ô tàu chưa bị bắn" : "không có tàu"}.`);
 }
@@ -832,33 +1051,42 @@ async function fire(x, y) {
   const b = targetOf(G.shooter), bi = G.boards.indexOf(b), k = x + "," + y;
   if (b.shots[k]) { renderAimbar(`⚠ Điểm ${P(x, y)} đã bắn rồi, chọn điểm khác.`); SFX.wrong(); return; }
   G.phase = "firing";
-  const t = G.teams[G.shooter];
+  const t = G.teams[G.shooter], in3D = is3D();
   t.shots++; G.shotsLeft--;
   renderAimbar(`Khai hỏa vào ${P(x, y)}…`);
   $("#aimbar").querySelectorAll("button,input").forEach(e => e.disabled = true);
-  // đạn bay
-  const pt = document.querySelector(`#board-${bi} .pt[data-x="${x}"][data-y="${y}"] .hitzone`);
-  const pr = pt.getBoundingClientRect(), to = { x: pr.left + pr.width / 2, y: pr.top + pr.height / 2 };
-  let from;
-  if (teamMode()) { const own = $(`#board-${1 - bi} svg`).getBoundingClientRect(); from = { x: own.left + own.width / 2, y: own.bottom - 10 }; }
-  else from = { x: innerWidth / 2, y: innerHeight + 20 };
   SFX.cannon();
   setTimeout(SFX.whistle, 120);
   banner(P(x, y), "#fde047", true);
-  await flyBall(from, to, { duration: 750, arc: -Math.max(160, Math.abs(to.x - from.x) * .35) });
+  let to = null;
+  if (in3D) {
+    Sea3D.hideCursor();
+    await Sea3D.flyBall(G.shooter, bi, x, y);
+  } else {
+    const pt = document.querySelector(`#board-${bi} .pt[data-x="${x}"][data-y="${y}"] .hitzone`);
+    const pr = pt.getBoundingClientRect();
+    to = { x: pr.left + pr.width / 2, y: pr.top + pr.height / 2 };
+    let from;
+    if (teamMode()) { const own = $(`#board-${1 - bi} svg`).getBoundingClientRect(); from = { x: own.left + own.width / 2, y: own.bottom - 10 }; }
+    else from = { x: innerWidth / 2, y: innerHeight + 20 };
+    await flyBall(from, to, { duration: 750, arc: -Math.max(160, Math.abs(to.x - from.x) * .35) });
+  }
   const sh = shipAt(b, x, y);
+  const sp = b.specials && b.specials[k];
   let msg;
   if (sh) {
     b.shots[k] = "hit"; sh.hits++; t.hits++;
-    SFX.boom(); flash("white", .6); shake(10, 350);
-    FX.burst(to.x, to.y, { n: 70, colors: ["#fde047", "#f97316", "#ef4444", "#ffffff", "#7c2d12"], speed: 520, shape: "mix" });
+    SFX.boom(); flash("white", .6);
+    if (in3D) Sea3D.fxImpact("hit", bi, x, y);
+    else { shake(10, 350); FX.burst(to.x, to.y, { n: 70, colors: ["#fde047", "#f97316", "#ef4444", "#ffffff", "#7c2d12"], speed: 520, shape: "mix" }); }
     if (sh.hits >= sh.len) {
       sh.sunk = true; t.sunk++;
       refreshBoard(bi);
       await sleep(350);
       SFX.sink();
       banner(`ĐÁNH CHÌM ${sh.name.toUpperCase()}!`, "#f97316", true);
-      sh.cells.forEach(([cx, cy]) => { const e = document.querySelector(`#board-${bi} .pt[data-x="${cx}"][data-y="${cy}"] .hitzone`); if (e) { const r = e.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, { n: 25, colors: ["#bae6fd", "#ffffff", "#0ea5e9"], speed: 260, up: .6 }); } });
+      if (in3D) Sea3D.fxImpact("sink", bi, x, y, { cells: sh.cells });
+      else sh.cells.forEach(([cx, cy]) => { const e = document.querySelector(`#board-${bi} .pt[data-x="${cx}"][data-y="${cy}"] .hitzone`); if (e) { const r = e.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, { n: 25, colors: ["#bae6fd", "#ffffff", "#0ea5e9"], speed: 260, up: .6 }); } });
       msg = `💥 Trúng ${P(x, y)} — đã đánh chìm ${sh.name} (${sh.len} ô)!`;
       await sleep(900);
     } else {
@@ -868,11 +1096,71 @@ async function fire(x, y) {
       await sleep(700);
     }
     if (S.bonusHit && !allSunk(b)) { G.shotsLeft++; msg += " Được thưởng thêm 1 phát!"; }
+  } else if (sp === "gift") {
+    b.shots[k] = "gift"; t.gifts++; G.shotsLeft++;
+    SFX.gift(); flash("white", .4);
+    if (in3D) Sea3D.fxImpact("gift", bi, x, y);
+    else FX.burst(to.x, to.y, { n: 65, colors: ["#fde047", "#f59e0b", "#4ade80", "#ffffff"], speed: 480, shape: "mix" });
+    refreshBoard(bi);
+    banner("🎁 TRÚNG QUÀ! +1 PHÁT BẮN!", "#fde047", true);
+    msg = `🎁 Trúng Rương Quà tại ${P(x, y)}! Được thưởng thêm +1 phát bắn!`;
+    await sleep(750);
+  } else if (sp === "beacon") {
+    b.shots[k] = "beacon"; t.gifts++;
+    let count = 0;
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) { const px = x + dx, py = y + dy; if (Math.abs(px) <= b.n && Math.abs(py) <= b.n && shipAt(b, px, py) && b.shots[px + "," + py] !== "hit") count++; }
+    b.radar.push({ x, y, count });
+    SFX.radar();
+    if (in3D) Sea3D.fxImpact("beacon", bi, x, y);
+    else FX.burst(to.x, to.y, { n: 55, colors: ["#4ade80", "#38bdf8", "#a7f3d0", "#ffffff"], speed: 420 });
+    refreshBoard(bi);
+    banner(`📡 PHAO RADAR! ${count} Ô TÀU!`, "#4ade80", true);
+    msg = `📡 Trúng Phao Radar tại ${P(x, y)}! Tự soi vùng 3×3: ${count ? count + " ô tàu chưa bị bắn" : "không có tàu"}.`;
+    await sleep(750);
+  } else if (sp === "pirate") {
+    b.shots[k] = "pirate"; t.traps++;
+    SFX.pirate(); flash("red", .65);
+    if (in3D) Sea3D.fxImpact("pirate", bi, x, y);
+    else { shake(12, 380); FX.burst(to.x, to.y, { n: 60, colors: ["#a855f7", "#ef4444", "#0f172a", "#fb7185"], speed: 460, shape: "mix" }); }
+    if (G.shotsLeft > 0) {
+      G.shotsLeft--;
+      banner("🏴‍☠️ CƯỚP BIỂN! −1 PHÁT BẮN!", "#fb7185", true);
+      msg = `🏴‍☠️ Trúng Tàu Cướp Biển tại ${P(x, y)}! Bị cướp mất 1 phát bắn trong lượt này!`;
+    } else {
+      t.shotPenalty++;
+      banner("🏴‍☠️ CƯỚP BIỂN! −1 PHÁT LƯỢT TỚI!", "#fb7185", true);
+      msg = `🏴‍☠️ Trúng Tàu Cướp Biển tại ${P(x, y)}! Bị trừ 1 phát bắn ở lượt trả lời đúng kế tiếp!`;
+    }
+    refreshBoard(bi); refreshAllHeads();
+    await sleep(800);
+  } else if (sp === "mine") {
+    b.shots[k] = "mine"; t.traps++;
+    SFX.mine(); flash("red", .75);
+    if (in3D) Sea3D.fxImpact("mine", bi, x, y);
+    else { shake(16, 460); FX.burst(to.x, to.y, { n: 75, colors: ["#f97316", "#ef4444", "#fde047", "#1e293b"], speed: 560, shape: "mix" }); }
+    if (!teamMode()) {
+      G.armor = Math.max(0, G.armor - 1);
+      refreshBoard(bi);
+      banner("💣 THỦY LÔI! TÀU MẸ −1 GIÁP!", "#f97316", true);
+      msg = `💣 Trúng Thủy Lôi tại ${P(x, y)}! Tàu mẹ bị mất 1 giáp${G.armor <= 0 ? " và đã chìm!" : "!"}`;
+      await sleep(800);
+      if (G.armor <= 0) { updateCounters(); return endGame("lose"); }
+    } else {
+      const enemy = G.teams[1 - G.shooter];
+      enemy.shotBonus++;
+      refreshBoard(bi); refreshAllHeads();
+      banner(`💣 THỦY LÔI! ${enemy.name.toUpperCase()} +1 PHÁT!`, "#f97316", true);
+      msg = `💣 Trúng Thủy Lôi tại ${P(x, y)}! Dội ngược — ${enemy.name} được thưởng +1 phát bắn ở lượt kế tiếp!`;
+      await sleep(800);
+    }
   } else {
     b.shots[k] = "miss";
     SFX.splash();
-    FX.burst(to.x, to.y, { n: 45, colors: ["#e0f2fe", "#7dd3fc", "#ffffff", "#0ea5e9"], speed: 380, up: .9, grav: 900 });
-    for (let i = 0; i < 3; i++) FX.add({ x: to.x, y: to.y, life: .6 + i * .15, fade: .6, size: 22 + i * 10, color: "#e0f2fe", shape: "ring" });
+    if (in3D) Sea3D.fxImpact("miss", bi, x, y);
+    else {
+      FX.burst(to.x, to.y, { n: 45, colors: ["#e0f2fe", "#7dd3fc", "#ffffff", "#0ea5e9"], speed: 380, up: .9, grav: 900 });
+      for (let i = 0; i < 3; i++) FX.add({ x: to.x, y: to.y, life: .6 + i * .15, fade: .6, size: 22 + i * 10, color: "#e0f2fe", shape: "ring" });
+    }
     refreshBoard(bi);
     msg = `🌊 Trượt! ${P(x, y)} chỉ có nước.`;
     await sleep(600);
@@ -900,8 +1188,9 @@ function next() {
 function endGame(type) {
   G.phase = "end"; stopTimer(); hideCard(); $("#aimbar").classList.add("hidden");
   G.boards.forEach(b => b.reveal = true); renderBoards();
-  const row = t => `<td>${esc(t.name)}</td><td>🎯 ${t.shots}</td><td>💥 ${t.hits}</td><td>${t.shots ? Math.round(t.hits / t.shots * 100) : 0}%</td><td>🚢 ${t.sunk}</td><td>✔ ${t.correct}/${t.answered}</td>`;
-  const head = `<tr><th></th><th>Phát bắn</th><th>Trúng</th><th>Chính xác</th><th>Đánh chìm</th><th>Trả lời đúng</th></tr>`;
+  const showSp = !!S.specials;
+  const row = t => `<td>${esc(t.name)}</td><td>🎯 ${t.shots}</td><td>💥 ${t.hits}</td><td>${t.shots ? Math.round(t.hits / t.shots * 100) : 0}%</td><td>🚢 ${t.sunk}</td>${showSp ? `<td>🎁 ${t.gifts} · 🏴‍☠️ ${t.traps}</td>` : ""}<td>✔ ${t.correct}/${t.answered}</td>`;
+  const head = `<tr><th></th><th>Phát bắn</th><th>Trúng</th><th>Chính xác</th><th>Đánh chìm</th>${showSp ? "<th>Quà / Bẫy</th>" : ""}<th>Trả lời đúng</th></tr>`;
   let medal, title, sub, win = false;
   if (!teamMode()) {
     const b = G.boards[0], sunk = b.ships.filter(s => s.sunk).length, total = b.ships.length;
@@ -924,10 +1213,14 @@ function endGame(type) {
   $("#endScreen").classList.remove("hidden");
   if (win) { SFX.victory(); FX.confetti(4); } else if (type === "lose") SFX.defeat(); else SFX.escape();
 }
-function showMap() { $("#endScreen").classList.add("hidden"); G.phase = "map"; renderAimbarMap(); }
+function showMap() {
+  $("#endScreen").classList.add("hidden"); G.phase = "map";
+  if (is3D()) { $("#btnCam").textContent = Sea3D.setCameraMode(1); }
+  renderAimbarMap();
+}
 function renderAimbarMap() {
   const bar = $("#aimbar"); bar.style.setProperty("--tc", "#fde047");
-  bar.innerHTML = `<span class="who">🗺 Vị trí toàn bộ hạm đội (viền vàng = tàu chưa bị bắn chìm)</span><button class="abtn next" data-act="back">↩ Kết quả</button><button class="abtn" data-act="again">↻ Chơi lại</button>`;
+  bar.innerHTML = `<span class="who">${is3D() ? "🗺 Đại dương 3D lộ diện (tàu vàng trong suốt = chưa chìm · kéo chuột xoay tự do)" : "🗺 Toàn bộ hạm đội, quà &amp; bẫy (viền đứt = ô chưa mở)"}</span><button class="abtn next" data-act="back">↩ Kết quả</button><button class="abtn" data-act="again">↻ Chơi lại</button>`;
   bar.classList.remove("hidden");
 }
 
@@ -964,7 +1257,16 @@ const SETTINGS_HTML = `
     <div class="field"><label>Lượt radar mỗi đội</label><input data-k="radar" type="number" min="0" max="5"></div>
   </div>
   <div class="field"><label>Tên 2 hạm đội</label><div class="tnames">${TEAM_DEF.map((d, i) => `<input data-t="${i}" maxlength="24" style="--tc:${d.c}">`).join("")}</div></div>
-  <label class="chk"><input data-k="bonusHit" type="checkbox"> Bắn trúng được thêm 1 phát</label>
+  <label class="chk"><input data-k="view3d" type="checkbox"> 🌊 Bật chế độ đồ họa 3D Đại dương (có thể đổi nhanh bằng nút trên thanh công cụ)</label>
+  <div class="sec">🎁 Bẫy &amp; Quà bí ẩn trên biển</div>
+  <label class="chk"><input data-k="specials" type="checkbox"> Bật bẫy &amp; quà bí ẩn (đặt trên ô nước trống)</label>
+  <div class="two">
+    <div class="field"><label>🎁 Rương Quà (+1 phát)</label><input data-k="gifts" type="number" min="0" max="8"></div>
+    <div class="field"><label>📡 Phao Radar (soi 3×3)</label><input data-k="beacons" type="number" min="0" max="5"></div>
+    <div class="field"><label>🏴‍☠️ Cướp Biển (−1 phát)</label><input data-k="pirates" type="number" min="0" max="8"></div>
+    <div class="field"><label>💣 Thủy Lôi (nổ dội ngược)</label><input data-k="mines" type="number" min="0" max="6"></div>
+  </div>
+  <label class="chk"><input data-k="bonusHit" type="checkbox"> Bắn trúng tàu được thêm 1 phát</label>
   <label class="chk"><input data-k="steal" type="checkbox"> Cho phép cướp lượt (2 đội)</label>
   <label class="chk"><input data-k="showCoord" type="checkbox"> Hiện tọa độ khi rê chuột / di chuyển</label>
   <label class="chk"><input data-k="shuffleQ" type="checkbox"> Trộn thứ tự câu hỏi</label>
@@ -1033,16 +1335,20 @@ $("#boards").addEventListener("click", e => {
 });
 $("#boards").addEventListener("mouseover", e => {
   if (G.phase !== "aim") return;
+  const ae = document.activeElement; if (ae && (ae.id === "inX" || ae.id === "inY")) return;
   const p = e.target.closest(".pt"), svg = e.target.closest("svg"); if (!p || !svg || G.boards[+svg.dataset.b] !== targetOf(G.shooter)) return;
   const x = +p.dataset.x, y = +p.dataset.y;
   if (x !== G.cursor.x || y !== G.cursor.y) { G.cursor = { x, y }; drawCursor(); syncInputs(); }
 });
+$("#btnView").addEventListener("click", () => toggleView3D());
+$("#btnCam").addEventListener("click", () => { if (!is3D()) return; $("#btnCam").textContent = Sea3D.cycleCamera(); A.init(); SFX.click(); });
 $("#btnStart").addEventListener("click", startGame);
 $("#btnAgain").addEventListener("click", startGame);
 $("#btnMap").addEventListener("click", showMap);
 ["#btnEdit", "#btnEdit2", "#btnEdit3"].forEach(s => $(s).addEventListener("click", openEditor));
 document.querySelectorAll("#modeSeg button").forEach(b => b.addEventListener("click", () => setOpt("mode", +b.dataset.v)));
 document.querySelectorAll("#sizeSeg button").forEach(b => b.addEventListener("click", () => setOpt("size", +b.dataset.v)));
+document.querySelectorAll("#viewSeg button").forEach(b => b.addEventListener("click", () => toggleView3D(!!+b.dataset.v)));
 function toggleMute() { A.init(); $("#btnMute").textContent = A.toggle() ? "🔇" : "🔊"; }
 function toggleFull() { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {}); else document.exitFullscreen?.(); }
 $("#btnMute").addEventListener("click", toggleMute);
@@ -1076,6 +1382,8 @@ addEventListener("keydown", e => {
     if (k === "escape" && G.radarMode) { G.radarMode = false; drawCursor(); renderAimbar(); return; }
   }
   if (inInput) return;
+  if (k === "t") return toggleView3D();
+  if (k === "v" && is3D()) { $("#btnCam").textContent = Sea3D.cycleCamera(); A.init(); SFX.click(); return; }
   if (k === "f") return toggleFull();
   if (k === "m") return toggleMute();
   if (k === "e") return openEditor();

@@ -9,6 +9,8 @@ Chạy hoàn toàn trên trình duyệt — không cần tài khoản, không c�
 - **2 đội đối kháng:** mỗi đội có vùng biển riêng, lần lượt trả lời và bắn vào vùng biển đối thủ. Trả lời sai thì đội kia được **cướp lượt**; cướp sai thì đối thủ được bắn 1 phát.
 - Trả lời đúng được bắn (mặc định 2 phát). Học sinh **đọc tọa độ** điểm muốn bắn, ví dụ $(2; -3)$, giáo viên bấm vào điểm đó hoặc gõ tọa độ.
 - Tàu nằm trên các điểm nguyên, theo hàng ngang hoặc dọc, không chạm nhau. Bắn trúng được thêm 1 phát.
+- **Bẫy & Quà bí ẩn** (bật/tắt và chỉnh số lượng trong **✎ Câu hỏi**): **🎁 Rương Quà** (+1 phát bắn), **📡 Phao Radar** (tự soi 3×3 không tốn lượt radar), **🏴‍☠️ Tàu Cướp Biển** (−1 phát bắn ngay trong lượt hoặc lượt kế tiếp), **💣 Thủy Lôi** (nổ dội ngược: 2 đội tặng đối thủ +1 phát, Cả lớp tàu mẹ −1 giáp).
+- **2 chế độ hiển thị 2D ↔ 3D trong cùng 1 game:** chọn **🗺 2D** hoặc **🌊 3D** ngay màn hình bắt đầu hoặc bấm nút **🌊 Chế độ 3D / 🗺 Chế độ 2D** trên thanh công cụ *(phím `T`)* để chuyển qua lại ngay giữa trận mà không mất dữ liệu tàu, phát bắn hay quà/bẫy. Ở chế độ 3D, bấm `V` để đổi 3 góc máy (`3D Chiến thuật`, `Toàn cảnh`, `Nhìn từ trên Oxy`).
 - **Radar:** soi vùng 3×3 để biết có bao nhiêu ô tàu (không mất phát bắn).
 - Bản đồ chọn được: x, y từ −3…3, −4…4 hoặc −5…5.
 
@@ -22,19 +24,22 @@ Chạy hoàn toàn trên trình duyệt — không cần tài khoản, không c�
 
 1. Mở `index.html` bằng Chrome hoặc Edge → màn hình giới thiệu **Hải Chiến Tọa Độ — Đại Chiến Biển Cả** hiện ra, bấm **⚓ VÀO GAME** (hoặc `Enter`).
 2. Bấm **✎ Câu hỏi** → **📄 Nhập file Word (.docx)** hoặc tự gõ câu hỏi → **Lưu**.
-3. Chọn **Cả lớp / 2 đội** và kích thước bản đồ → **Ra khơi!** Nhấn `F` để chiếu toàn màn hình.
+3. Chọn **Cả lớp / 2 đội**, kích thước bản đồ và **🗺 2D / 🌊 3D** → **Ra khơi!** Nhấn `F` để chiếu toàn màn hình.
 
 Phím tắt: `A`–`D` hoặc `1`–`4` trả lời · Đúng/Sai: `1`/`2` · Trả lời ngắn: `Enter` xem đáp án, `1` đúng, `2` sai ·
-ngắm bắn: bấm vào điểm hoặc `←↑→↓` rồi `Enter` · `R` radar · `Space` tiếp tục · `M` tắt tiếng.
+ngắm bắn: bấm vào điểm hoặc `←↑→↓` rồi `Enter` · `T` đổi 2D/3D · `V` đổi góc máy 3D · `R` radar · `Space` tiếp tục · `M` tắt tiếng.
 
 > Câu hỏi, ảnh và cài đặt được lưu **trong trình duyệt của máy đang dùng** (localStorage + IndexedDB), không gửi lên máy chủ nào.
 
 ## Cấu trúc thư mục
 
 ```
-index.html              # game (giao diện + luật chơi)
+index.html              # game (giao diện 2D + điều phối chế độ 2D/3D + luật chơi)
 favicon.svg
-assets/gioi-thieu.jpg   # ảnh màn hình giới thiệu (đã nén ~370 KB)
+assets/gioi-thieu.jpg   # ảnh màn hình giới thiệu
+assets/logo-giaovienai.png # logo GIAOVIENAI góc trên trái màn hình mở màn
+lib/three.min.js        # Three.js r147 (MIT, chạy 3D offline)
+lib/sea3d.js            # engine đại dương 3D gắn trực tiếp vào Hải Chiến Tọa Độ
 lib/qbank.js            # ngân hàng câu hỏi, khung soạn đề, âm thanh, hiệu ứng
 lib/mtef2tex.js         # đọc công thức MathType / Equation 3.0 -> LaTeX
 lib/docx-import.js      # đọc đề Word (.docx)

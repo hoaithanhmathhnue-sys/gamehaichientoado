@@ -7,6 +7,7 @@ Game dùng các thư viện mã nguồn mở sau, được lưu sẵn trong thư
 | [KaTeX](https://katex.org) | 0.16.11 | `katex/` | MIT — © 2013-2020 Khan Academy and other contributors |
 | [JSZip](https://stuk.github.io/jszip/) | 3.10.1 | `lib/jszip.min.js` | MIT hoặc GPLv3 (chọn MIT) — © 2009-2016 Stuart Knightley, David Duponchel, Franz Buchinger, António Afonso |
 | [cfb (SheetJS)](https://github.com/SheetJS/js-cfb) | 1.2.2 | `lib/cfb.min.js` | Apache License 2.0 — © 2013-present SheetJS LLC |
+| [Three.js](https://threejs.org) | 0.147.0 | `lib/three.min.js` | MIT — © 2010-2022 three.js authors |
 
 Toàn văn giấy phép của từng thư viện nằm trong thư mục `licenses/`.
 
